@@ -41,20 +41,38 @@ export default class App extends React.Component {
     return index;
   };
 
-  isInTheFuture = timestamp => {
-    const now = moment.now();
-    return now < timestamp;
-  };
+  isWithinEightHours = timestamp => {
+    const now = (Date.now() / 1000).toFixed(0);
+    const arrival = timestamp - 60 * 60 * 8;
+    const departure = timestamp;
 
-  isToday = timestamp => {
-    if (
-      moment(timestamp).format('DD/MM/YYYY') ===
-      moment(new Date()).format('DD/MM/YYYY')
-    ) {
+    if (now > arrival && now < departure) {
       return true;
     } else {
       return false;
     }
+  };
+
+  isToday = timestamp => {
+    const now = moment();
+    if (moment(timestamp).isSame(now, 'day')) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  makeTwoArrays = arrayOfUsers => {
+    let inUsers = [];
+    let outUsers = [];
+    arrayOfUsers.forEach(user => {
+      if (this.isWithinEightHours(user.timestamp)) {
+        inUsers.push(user);
+      } else {
+        outUsers.push(user);
+      }
+    });
+    return { inUsers, outUsers };
   };
 
   componentDidMount = async () => {
@@ -69,15 +87,19 @@ export default class App extends React.Component {
       team: recentDepartures
     });
 
-    if (this.state.self.email) {
-      const currentUserMostRecentArrival = this.state.team.filter(
-        teamMember => {
-          return teamMember.users_id === this.state.self.id;
-        }
-      )[0].timestamp;
-      console.log(currentUserMostRecentArrival);
+    const userStates = this.makeTwoArrays(this.state.team);
 
-      
+    this.setState({ inTeam: userStates.inUsers, outTeam: userStates.outUsers });
+
+    if (this.state.self.email) {
+      const currentUserLatestDeparture = this.state.team.filter(teamMember => {
+        return teamMember.users_id === this.state.self.id;
+      })[0].timestamp;
+      const now = moment().unix();
+
+      if (now < currentUserLatestDeparture) {
+        this.setState({ self: { ...this.state.self, in: true } });
+      }
     }
 
     this.socket.on('arrival', details => {
@@ -91,12 +113,9 @@ export default class App extends React.Component {
       const newTeam = [...this.state.team];
       newTeam[indexOfUserToUpdate].timestamp = details.arrival.timestamp;
       this.setState({ team: newTeam });
-
-      console.log(this.state);
     });
 
     this.setState({ loading: false });
-    console.log(this.state);
   };
 
   handleToggle = async () => {
@@ -146,57 +165,44 @@ export default class App extends React.Component {
               <Col>
                 <h2>In</h2>
                 <ListGroup>
-                  {this.state.team
-                    .filter(
-                      teamMember =>
-                        this.isInTheFuture(moment.unix(teamMember.timestamp)) &&
-                        !this.isToday(teamMember.timestamp)
-                    )
-                    .map((teamMember, index) => {
-                      return (
-                        <ListGroup.Item
-                          key={index}
-                          variant="success"
-                          style={{ display: 'inline' }}>
-                          <div
-                            style={{
-                              float: 'left'
-                            }}>{`${teamMember.first_name} ${teamMember.last_name} -- In`}</div>
-                          <div style={{ float: 'right' }}>
-                            {moment
-                              .unix(teamMember.timestamp)
+                  {this.state.inTeam.map((teamMember, index) => {
+                    return (
+                      <ListGroup.Item
+                        key={index}
+                        variant="success"
+                        style={{ display: 'inline' }}>
+                        <div
+                          style={{
+                            float: 'left'
+                          }}>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
+                        <div style={{ float: 'right' }}>
+                          {moment
+                            .unix(teamMember.timestamp)
 
-                              .format('LTS')}
-                          </div>
-                        </ListGroup.Item>
-                      );
-                    })}
+                            .format('LTS')}
+                        </div>
+                      </ListGroup.Item>
+                    );
+                  })}
                 </ListGroup>
                 <h2>Out</h2>
                 <ListGroup>
-                  {this.state.team
-                    .filter(
-                      teamMember =>
-                        !this.isInTheFuture(
-                          moment.unix(teamMember.timestamp)
-                        ) && !this.isToday(teamMember.timestamp)
-                    )
-                    .map((teamMember, index) => {
-                      return (
-                        <ListGroup.Item key={index} variant="danger">
-                          <div
-                            style={{
-                              float: 'left'
-                            }}>{`${teamMember.first_name} ${teamMember.last_name} -- Out`}</div>
-                          <div style={{ float: 'right' }}>
-                            {moment
-                              .unix(teamMember.timestamp)
+                  {this.state.outTeam.map((teamMember, index) => {
+                    return (
+                      <ListGroup.Item key={index} variant="danger">
+                        <div
+                          style={{
+                            float: 'left'
+                          }}>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
+                        <div style={{ float: 'right' }}>
+                          {moment
+                            .unix(teamMember.timestamp)
 
-                              .format('LTS')}
-                          </div>
-                        </ListGroup.Item>
-                      );
-                    })}
+                            .format('LTS')}
+                        </div>
+                      </ListGroup.Item>
+                    );
+                  })}
                 </ListGroup>
               </Col>
             </Row>

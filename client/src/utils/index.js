@@ -11,6 +11,7 @@ export const getTeamDepartures = async () => {
 };
 
 export const newArrival = async user => {
+  console.log(user)
   const arrival = await axios.post('/api/arrival', user);
   const departure = await axios.post('/api/departure', arrival.data);
   console.log(departure.data);
