@@ -6,7 +6,8 @@ import {
   Container,
   Row,
   Col,
-  Form
+  Form,
+  Spinner
 } from 'react-bootstrap';
 
 import axios from 'axios';
@@ -17,18 +18,20 @@ import socketIOClient from 'socket.io-client';
 import * as actions from './utils';
 
 export default class App extends React.Component {
-
-  
   state = {
     self: { in: false },
     team: [],
     socketDetails: {},
     response: false,
     devEndpoint: 'http://127.0.0.1:2001',
-    prodEndpoint: 'http://cats-tracker.herokuapp.com'
+    prodEndpoint: 'http://cats-tracker.herokuapp.com',
+    loading: true
   };
 
-  socket = process.env.NODE_ENV === 'production' ? socketIOClient(this.state.prodEndpoint) : socketIOClient(this.state.devEndpoint);
+  socket =
+    process.env.NODE_ENV === 'production'
+      ? socketIOClient(this.state.prodEndpoint)
+      : socketIOClient(this.state.devEndpoint);
 
   returnIndexOfUpdatedUser = (id, teamArray) => {
     const index = teamArray.findIndex(object => object.users_id === id);
@@ -62,6 +65,7 @@ export default class App extends React.Component {
       console.log(this.state);
     });
 
+    this.setState({ loading: false });
     console.log(this.state);
   };
 
@@ -93,80 +97,100 @@ export default class App extends React.Component {
   render() {
     return (
       <Container>
-        <Navbar>
-          <Navbar.Brand href="/">In-Out-Tracker</Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav>{this.state.self.email}</Nav>
-            <Nav className="mr-auto">
-              {this.state.self.email ? (
-                <Nav.Link href="/api/logout">Logout</Nav.Link>
-              ) : (
-                <Nav.Link href="/auth/google">Log In</Nav.Link>
-              )}
-            </Nav>
-            {this.state.self.email ? (
-              <Form>
-                <Form.Check
-                  type="switch"
-                  id="custom-switch"
-                  label={this.state.self.in ? 'In' : 'Out'}
-                  onClick={this.handleToggle}
-                />
-              </Form>
-            ) : null}
-          </Navbar.Collapse>
-        </Navbar>
-        <Row>
-          <Col>
-            <ListGroup>
-              {this.state.team.map((teamMember, index) => {
-                if (
-                  this.isInTheFuture(moment.unix(teamMember.timestamp)) &&
-                  !this.isToday(teamMember.timestamp)
-                ) {
-                  return (
-                    <ListGroup.Item
-                      key={index}
-                      variant="success"
-                      style={{ display: 'inline' }}>
-                      <div
-                        style={{
-                          float: 'left'
-                        }}>{`${teamMember.first_name} ${teamMember.last_name} -- In`}</div>
-                      <div style={{ float: 'right' }}>
-                        {moment
-                          .unix(teamMember.timestamp)
+        {this.state.loading ? (
+          <div style={{ position: 'fixed', top: '50%', left: '50%' }}>
+            <Spinner animation="border" role="status"></Spinner>
+          </div>
+        ) : (
+          <div>
+            <Navbar expand="md">
+              <Navbar.Brand href="/">In-Out-Tracker</Navbar.Brand>
+              <Nav>{this.state.self.first_name}</Nav>
+              <Navbar.Toggle aria-controls="basic-navbar-nav" />
+              <Navbar.Collapse id="basic-navbar-nav">
+                <Nav className="mr-auto">
+                  {this.state.self.email ? (
+                    <Nav.Link href="/api/logout">Logout</Nav.Link>
+                  ) : (
+                    <Nav.Link href="/auth/google">Log In</Nav.Link>
+                  )}
+                </Nav>
+                {this.state.self.email ? (
+                  <Form>
+                    <Form.Check
+                      type="switch"
+                      id="custom-switch"
+                      label={this.state.self.in ? 'In' : 'Out'}
+                      onClick={this.handleToggle}
+                    />
+                  </Form>
+                ) : null}
+              </Navbar.Collapse>
+            </Navbar>
+            <Row>
+              <Col>
+                <h2>In</h2>
+                <ListGroup>
+                  {this.state.team
+                    .filter(
+                      teamMember =>
+                        this.isInTheFuture(moment.unix(teamMember.timestamp)) &&
+                        !this.isToday(teamMember.timestamp)
+                    )
+                    .map((teamMember, index) => {
+                      return (
+                        <ListGroup.Item
+                          key={index}
+                          variant="success"
+                          style={{ display: 'inline' }}>
+                          <div
+                            style={{
+                              float: 'left'
+                            }}>{`${teamMember.first_name} ${teamMember.last_name} -- In`}</div>
+                          <div style={{ float: 'right' }}>
+                            {moment
+                              .unix(teamMember.timestamp)
 
-                          .format('LTS')}
-                      </div>
-                    </ListGroup.Item>
-                  );
-                } else {
-                  return (
-                    <ListGroup.Item key={index} variant="danger">
-                      <div
-                        style={{
-                          float: 'left'
-                        }}>{`${teamMember.first_name} ${teamMember.last_name} -- Out`}</div>
-                      <div style={{ float: 'right' }}>
-                        {moment
-                          .unix(teamMember.timestamp)
+                              .format('LTS')}
+                          </div>
+                        </ListGroup.Item>
+                      );
+                    })}
+                </ListGroup>
+                <h2>Out</h2>
+                <ListGroup>
+                  {this.state.team
+                    .filter(
+                      teamMember =>
+                        !this.isInTheFuture(moment.unix(teamMember.timestamp)) &&
+                        !this.isToday(teamMember.timestamp)
+                    )
+                    .map((teamMember, index) => {
+                      return (
+                        <ListGroup.Item key={index} variant="danger">
+                          <div
+                            style={{
+                              float: 'left'
+                            }}>{`${teamMember.first_name} ${teamMember.last_name} -- Out`}</div>
+                          <div style={{ float: 'right' }}>
+                            {moment
+                              .unix(teamMember.timestamp)
 
-                          .format('LTS')}
-                      </div>
-                    </ListGroup.Item>
-                  );
-                }
-              })}
-            </ListGroup>
-          </Col>
-        </Row>
-        <div>
-          {this.state.socketDetails.arrival
-            ? this.state.socketDetails.arrival.timestamp
-            : null}
-        </div>
+                              .format('LTS')}
+                          </div>
+                        </ListGroup.Item>
+                      );
+                    })}
+                </ListGroup>
+              </Col>
+            </Row>
+            <div>
+              {this.state.socketDetails.arrival
+                ? this.state.socketDetails.arrival.timestamp
+                : null}
+            </div>
+          </div>
+        )}
       </Container>
     );
   }
