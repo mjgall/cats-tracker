@@ -5,7 +5,8 @@ const pool = mysql.createPool({
   user: 'admin',
   password: '12345678',
   port: 3306,
-  database: 'tracker'
+  database: 'tracker',
+  acquireTimeout: 30000
 });
 
 exports.pool = pool;
