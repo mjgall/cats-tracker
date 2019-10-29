@@ -17,15 +17,18 @@ import socketIOClient from 'socket.io-client';
 import * as actions from './utils';
 
 export default class App extends React.Component {
+
+  
   state = {
     self: { in: false },
     team: [],
     socketDetails: {},
     response: false,
-    endpoint: 'http://127.0.0.1:2001'
+    devEndpoint: 'http://127.0.0.1:2001',
+    prodEndpoint: 'http://cats-tracker.herokuapp.com'
   };
 
-  socket = socketIOClient(this.state.endpoint);
+  socket = process.env.NODE_ENV === 'production' ? socketIOClient(this.state.prodEndpoint) : socketIOClient(this.state.devEndpoint);
 
   returnIndexOfUpdatedUser = (id, teamArray) => {
     const index = teamArray.findIndex(object => object.users_id === id);
