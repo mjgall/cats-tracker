@@ -3,8 +3,8 @@ const path = require('path');
 const express = require('express');
 const app = express();
 
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const http = require('http').createServer(app);
+const io = require('socket.io').listen(http);
 
 //
 const cookieSession = require('cookie-session');
@@ -43,14 +43,14 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-io.on('connection', socket => {
+io.sockets.on('connection', socket => {
   console.log('a user connected');
   socket.on('arrival', details => {
     console.log(details);
-    io.emit('arrival', details);
+    io.sockets.emit('arrival', details);
   });
 });
 
-io;
-
-http.listen(process.env.PORT || 2001, () => console.log("We're running on 2001"));
+http.listen(process.env.PORT || 2001, () =>
+  console.log("We're running on 2001")
+);
