@@ -173,8 +173,18 @@ export default class App extends React.Component {
                         style={{ display: 'inline' }}>
                         <div
                           style={{
-                            float: 'left'
-                          }}>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
+                            float: 'left',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                          <div>
+                            <Image
+                              style={{ height: '2em', width: '2em', marginRight: '1em' }}
+                              src={teamMember.photo_url}
+                              roundedCircle></Image>
+                          </div>
+                          <span>{`${teamMember.first_name} ${teamMember.last_name}`}</span>
+                        </div>
                         <div style={{ float: 'right' }}>
                           {moment
                             .unix(teamMember.timestamp)
@@ -192,8 +202,18 @@ export default class App extends React.Component {
                       <ListGroup.Item key={index} variant="danger">
                         <div
                           style={{
-                            float: 'left'
-                          }}>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
+                            float: 'left',
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                          <div>
+                          <Image
+                              style={{ height: '2em', width: '2em', marginRight: '1em' }}
+                              src={teamMember.photo_url}
+                              roundedCircle></Image>
+                          </div>
+                          <div>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
+                        </div>
                         <div style={{ float: 'right' }}>
                           {moment
                             .unix(teamMember.timestamp)
