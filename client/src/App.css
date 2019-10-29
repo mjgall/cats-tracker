@@ -1,0 +1,19 @@
+.navbar {
+  padding-left: 0;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+.navbar-brand > img {
+  height: 1.5em;
+  width: 1.5em;
+}
+
+/* Portrait and Landscape */
+@media only screen and (min-device-width: 375px) and (max-device-width: 812px) {
+  .btn-success {
+    width: 100%;
+  }
+}

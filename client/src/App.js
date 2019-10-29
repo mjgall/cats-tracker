@@ -6,9 +6,12 @@ import {
   Container,
   Row,
   Col,
-  Form,
-  Spinner
+  Spinner,
+  Button,
+  Image
 } from 'react-bootstrap';
+import logo from './favicon-96-99fb5624ade39a5d238ce5a85127348575ff4f19a215e382646b92d1cb9a250d.png';
+import './App.css';
 
 import axios from 'axios';
 import moment from 'moment';
@@ -38,6 +41,22 @@ export default class App extends React.Component {
     return index;
   };
 
+  isInTheFuture = timestamp => {
+    const now = moment.now();
+    return now < timestamp;
+  };
+
+  isToday = timestamp => {
+    if (
+      moment(timestamp).format('DD/MM/YYYY') ===
+      moment(new Date()).format('DD/MM/YYYY')
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   componentDidMount = async () => {
     const currentUser = await axios.get('/api/current_user');
     if (currentUser.data) {
@@ -49,6 +68,17 @@ export default class App extends React.Component {
       ...this.state,
       team: recentDepartures
     });
+
+    if (this.state.self.email) {
+      const currentUserMostRecentArrival = this.state.team.filter(
+        teamMember => {
+          return teamMember.users_id === this.state.self.id;
+        }
+      )[0].timestamp;
+      console.log(currentUserMostRecentArrival);
+
+      
+    }
 
     this.socket.on('arrival', details => {
       this.setState({ ...this.state, socketDetails: details });
@@ -78,22 +108,6 @@ export default class App extends React.Component {
     this.setState({ self: { ...this.state.self, in: !this.state.self.in } });
   };
 
-  isInTheFuture = timestamp => {
-    const now = moment.now();
-    return now < timestamp;
-  };
-
-  isToday = timestamp => {
-    if (
-      moment(timestamp).format('DD/MM/YYYY') ===
-      moment(new Date()).format('DD/MM/YYYY')
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   render() {
     return (
       <Container>
@@ -104,7 +118,10 @@ export default class App extends React.Component {
         ) : (
           <div>
             <Navbar expand="md">
-              <Navbar.Brand href="/">In-Out-Tracker</Navbar.Brand>
+              {/* <Navbar.Brand href="/">In-Out-Tracker</Navbar.Brand> */}
+              <Navbar.Brand>
+                <Image src={logo}></Image>
+              </Navbar.Brand>
               <Nav>{this.state.self.first_name}</Nav>
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
@@ -116,14 +133,12 @@ export default class App extends React.Component {
                   )}
                 </Nav>
                 {this.state.self.email ? (
-                  <Form>
-                    <Form.Check
-                      type="switch"
-                      id="custom-switch"
-                      label={this.state.self.in ? 'In' : 'Out'}
-                      onClick={this.handleToggle}
-                    />
-                  </Form>
+                  <Button
+                    disabled={this.state.self.in}
+                    onClick={this.handleToggle}
+                    variant="success">
+                    Check in
+                  </Button>
                 ) : null}
               </Navbar.Collapse>
             </Navbar>
@@ -162,8 +177,9 @@ export default class App extends React.Component {
                   {this.state.team
                     .filter(
                       teamMember =>
-                        !this.isInTheFuture(moment.unix(teamMember.timestamp)) &&
-                        !this.isToday(teamMember.timestamp)
+                        !this.isInTheFuture(
+                          moment.unix(teamMember.timestamp)
+                        ) && !this.isToday(teamMember.timestamp)
                     )
                     .map((teamMember, index) => {
                       return (
