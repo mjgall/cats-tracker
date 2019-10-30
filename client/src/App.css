@@ -29,6 +29,9 @@
   .navbar-brand {
     margin-right: 0;
   }
+  h2 {
+    text-align: center;
+  }
 }
 
 @media (min-width: 1200px) {
