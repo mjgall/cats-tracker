@@ -17,8 +17,8 @@
 }
 
 .btn-success:hover {
-  background-color:  #00b277;
-  border-color:  #00b277;
+  background-color: #00b277;
+  border-color: #00b277;
 }
 
 .btn-success:disabled {
@@ -26,6 +26,11 @@
   border: #4b2b6e;
 }
 
+@media (max-width: 1199px) {
+  #out-group {
+    margin-top: 3%;
+  }
+}
 
 @media (max-width: 768px) {
   .btn {
@@ -45,7 +50,8 @@
     max-width: 1000px;
   }
 
-  #in-group, #out-group {
+  #in-group,
+  #out-group {
     width: 45%;
   }
 
