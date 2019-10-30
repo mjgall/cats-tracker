@@ -16,6 +16,11 @@
   border: #4b2b6e;
 }
 
+.btn-success:disabled {
+  background-color: #4b2b6e54;
+  border: #4b2b6e;
+}
+
 /* Portrait and Landscape */
 @media only screen and (min-device-width: 375px) and (max-device-width: 812px) {
   .btn {
