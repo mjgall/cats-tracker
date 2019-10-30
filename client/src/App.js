@@ -11,6 +11,7 @@ import {
   Image
 } from 'react-bootstrap';
 import logo from './favicon-96-99fb5624ade39a5d238ce5a85127348575ff4f19a215e382646b92d1cb9a250d.png';
+import fullLogo from './cats-logo.png';
 import './App.css';
 
 import axios from 'axios';
@@ -76,6 +77,31 @@ export default class App extends React.Component {
   };
 
   componentDidMount = async () => {
+    this.socket.on('arrival', details => {
+      if (details.currentlyIn) {
+        const index = this.returnIndexOfUpdatedUser(
+          details.user.id,
+          this.state.inTeam
+        );
+
+        const newTeam = [...this.state.inTeam];
+        newTeam[index].timestamp = details.departure.timestamp;
+        this.setState({ inTeam: newTeam });
+      } else {
+        const index = this.returnIndexOfUpdatedUser(
+          details.user.id,
+          this.state.outTeam
+        );
+
+        const newOutTeam = [...this.state.outTeam];
+        const transferredMember = newOutTeam.splice(index, 1)[0];
+        transferredMember.timestamp = transferredMember.timestamp =
+          details.departure.timestamp;
+        const newInTeam = [transferredMember, ...this.state.inTeam];
+        this.setState({ outTeam: newOutTeam, inTeam: newInTeam });
+      }
+    });
+
     const currentUser = await axios.get('/api/current_user');
     if (currentUser.data) {
       this.setState({ self: currentUser.data });
@@ -102,29 +128,32 @@ export default class App extends React.Component {
       }
     }
 
-    this.socket.on('arrival', details => {
-      this.setState({ ...this.state, socketDetails: details });
-
-      const indexOfUserToUpdate = this.returnIndexOfUpdatedUser(
-        details.arrival.user_id,
-        this.state.team
-      );
-
-      const newTeam = [...this.state.team];
-      newTeam[indexOfUserToUpdate].timestamp = details.arrival.timestamp;
-      this.setState({ team: newTeam });
-    });
-
     this.setState({ loading: false });
   };
 
   handleToggle = async () => {
     //add an arrival if they are out and subsequent departure
-    if (!this.state.self.in) {
-      const arrival = await actions.newArrival(this.state.self);
-      this.socket.emit('arrival', { user: this.state.self, arrival });
+
+    //returns departure for an arrival
+    const departure = await actions.newArrival(this.state.self);
+
+    if (
+      this.returnIndexOfUpdatedUser(this.state.self.id, this.state.inTeam) > -1
+    ) {
+      this.socket.emit('arrival', {
+        user: this.state.self,
+        departure,
+        currentlyIn: true
+      });
+    } else {
+      this.socket.emit('arrival', {
+        user: this.state.self,
+        departure,
+        currentlyIn: false
+      });
     }
-    this.setState({ self: { ...this.state.self, in: !this.state.self.in } });
+
+    this.setState({ self: { ...this.state.self, in: true } });
   };
 
   render() {
@@ -139,16 +168,23 @@ export default class App extends React.Component {
             <Navbar expand="md">
               {/* <Navbar.Brand href="/">In-Out-Tracker</Navbar.Brand> */}
               <Navbar.Brand>
-                <Image src={logo}></Image>
+                <Image src={fullLogo}></Image>
               </Navbar.Brand>
-              <Nav>{this.state.self.first_name}</Nav>
+
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="mr-auto">
+                <Nav style={{ textAlign: 'center' }}>
+                  {this.state.self.email}
+                </Nav>
+                <Nav className="ml-auto">
                   {this.state.self.email ? (
-                    <Nav.Link href="/api/logout">Logout</Nav.Link>
+                    <Nav.Link href="/api/logout">
+                      <Button variant="outline-secondary">Log Out</Button>
+                    </Nav.Link>
                   ) : (
-                    <Nav.Link href="/auth/google">Log In</Nav.Link>
+                    <Nav.Link href="/auth/google">
+                      <Button variant="outline-secondary">Log In</Button>
+                    </Nav.Link>
                   )}
                 </Nav>
                 {this.state.self.email ? (
@@ -179,7 +215,11 @@ export default class App extends React.Component {
                           }}>
                           <div>
                             <Image
-                              style={{ height: '2em', width: '2em', marginRight: '1em' }}
+                              style={{
+                                height: '2em',
+                                width: '2em',
+                                marginRight: '1em'
+                              }}
                               src={teamMember.photo_url}
                               roundedCircle></Image>
                           </div>
@@ -207,8 +247,12 @@ export default class App extends React.Component {
                             alignItems: 'center'
                           }}>
                           <div>
-                          <Image
-                              style={{ height: '2em', width: '2em', marginRight: '1em' }}
+                            <Image
+                              style={{
+                                height: '2em',
+                                width: '2em',
+                                marginRight: '1em'
+                              }}
                               src={teamMember.photo_url}
                               roundedCircle></Image>
                           </div>

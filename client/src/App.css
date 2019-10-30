@@ -1,5 +1,6 @@
 .navbar {
   padding-left: 0;
+  padding-right: 0;
 }
 
 .navbar-brand {
@@ -7,13 +8,26 @@
   align-items: center;
 }
 .navbar-brand > img {
-  height: 1.5em;
-  width: 1.5em;
+  height: 2em;
+}
+
+.btn-success {
+  background-color: #4b2b6e;
+  border: #4b2b6e;
 }
 
 /* Portrait and Landscape */
 @media only screen and (min-device-width: 375px) and (max-device-width: 812px) {
-  .btn-success {
+  .btn {
     width: 100%;
+  }
+  .navbar-brand {
+    margin-right: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: 740px;
   }
 }
