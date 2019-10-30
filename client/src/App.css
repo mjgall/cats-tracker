@@ -21,14 +21,15 @@
   border: #4b2b6e;
 }
 
-/* Portrait and Landscape */
-@media only screen and (min-device-width: 375px) and (max-device-width: 812px) {
+
+@media (max-width: 768px) {
   .btn {
     width: 100%;
   }
   .navbar-brand {
     margin-right: 0;
   }
+
   h2 {
     text-align: center;
   }
