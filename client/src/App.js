@@ -10,25 +10,26 @@ import {
   Button,
   Image
 } from 'react-bootstrap';
-import logo from './favicon-96-99fb5624ade39a5d238ce5a85127348575ff4f19a215e382646b92d1cb9a250d.png';
 import fullLogo from './cats-logo.png';
 import './App.css';
 
 import axios from 'axios';
 import moment from 'moment';
-import 'moment-timezone';
+
 import socketIOClient from 'socket.io-client';
 
 import * as actions from './utils';
 
 export default class App extends React.Component {
   state = {
-    self: { in: false },
+    self: { in: false, isLoggedIn: false },
     team: [],
+    inTeam: [],
+    outTeam: [],
     socketDetails: {},
-    response: false,
     devEndpoint: 'http://127.0.0.1:2001',
     prodEndpoint: 'http://cats-tracker.herokuapp.com',
+    env: process.env.NODE_ENV,
     loading: true
   };
 
@@ -54,16 +55,7 @@ export default class App extends React.Component {
     }
   };
 
-  isToday = timestamp => {
-    const now = moment();
-    if (moment(timestamp).isSame(now, 'day')) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  makeTwoArrays = arrayOfUsers => {
+  splitTeam = arrayOfUsers => {
     let inUsers = [];
     let outUsers = [];
     arrayOfUsers.forEach(user => {
@@ -104,7 +96,7 @@ export default class App extends React.Component {
 
     const currentUser = await axios.get('/api/current_user');
     if (currentUser.data) {
-      this.setState({ self: currentUser.data });
+      this.setState({ self: { ...currentUser.data, isLoggedIn: true } });
     }
 
     const recentDepartures = await actions.getTeamDepartures();
@@ -113,15 +105,15 @@ export default class App extends React.Component {
       team: recentDepartures
     });
 
-    const userStates = this.makeTwoArrays(this.state.team);
+    const splitTeams = this.splitTeam(this.state.team);
 
-    this.setState({ inTeam: userStates.inUsers, outTeam: userStates.outUsers });
+    this.setState({ inTeam: splitTeams.inUsers, outTeam: splitTeams.outUsers });
 
-    if (this.state.self.email) {
+    if (this.state.self.isLoggedIn) {
       const currentUserLatestDeparture = this.state.team.filter(teamMember => {
         return teamMember.users_id === this.state.self.id;
       })[0].timestamp;
-      const now = moment().unix();
+      const now = parseInt((Date.now() / 1000))
 
       if (now < currentUserLatestDeparture) {
         this.setState({ self: { ...this.state.self, in: true } });
@@ -131,10 +123,9 @@ export default class App extends React.Component {
     this.setState({ loading: false });
   };
 
-  handleToggle = async () => {
-    //add an arrival if they are out and subsequent departure
+  handleCheckInClick = async () => {
 
-    //returns departure for an arrival
+    //returns the departure
     const departure = await actions.newArrival(this.state.self);
 
     if (
@@ -166,7 +157,6 @@ export default class App extends React.Component {
         ) : (
           <div>
             <Navbar expand="md">
-              {/* <Navbar.Brand href="/">In-Out-Tracker</Navbar.Brand> */}
               <Navbar.Brand>
                 <Image src={fullLogo}></Image>
               </Navbar.Brand>
@@ -177,7 +167,7 @@ export default class App extends React.Component {
                   {this.state.self.email}
                 </Nav>
                 <Nav className="ml-auto">
-                  {this.state.self.email ? (
+                  {this.state.self.isLoggedIn ? (
                     <Nav.Link href="/api/logout">
                       <Button variant="outline-secondary">Log Out</Button>
                     </Nav.Link>
@@ -187,10 +177,10 @@ export default class App extends React.Component {
                     </Nav.Link>
                   )}
                 </Nav>
-                {this.state.self.email ? (
+                {this.state.self.isLoggedIn ? (
                   <Button
                     disabled={this.state.self.in}
-                    onClick={this.handleToggle}
+                    onClick={this.handleCheckInClick}
                     variant="success">
                     Check in
                   </Button>
