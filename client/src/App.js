@@ -198,76 +198,77 @@ export default class App extends React.Component {
               </Navbar.Collapse>
             </Navbar>
             <Row>
-              <Col>
-                <h2>In</h2>
-                <ListGroup>
-                  {this.state.inTeam.map((teamMember, index) => {
-                    return (
-                      <ListGroup.Item
-                        key={index}
-                        variant="success"
-                        style={{ display: 'inline' }}>
-                        <div
-                          style={{
-                            float: 'left',
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}>
-                          <div>
-                            <Image
-                              style={{
-                                height: '2em',
-                                width: '2em',
-                                marginRight: '1em'
-                              }}
-                              src={teamMember.photo_url}
-                              roundedCircle></Image>
+              <Col className="group-container">
+                <div id="in-group">
+                  <h2>In</h2>
+                  <ListGroup>
+                    {this.state.inTeam.map((teamMember, index) => {
+                      return (
+                        <ListGroup.Item key={index} variant="success">
+                          <div
+                            style={{
+                              float: 'left',
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}>
+                            <div>
+                              <Image
+                                style={{
+                                  height: '2em',
+                                  width: '2em',
+                                  marginRight: '1em'
+                                }}
+                                src={teamMember.photo_url}
+                                roundedCircle></Image>
+                            </div>
+                            <span>{`${teamMember.first_name} ${teamMember.last_name}`}</span>
                           </div>
-                          <span>{`${teamMember.first_name} ${teamMember.last_name}`}</span>
-                        </div>
-                        <div style={{ float: 'right' }}>
-                          {moment
-                            .unix(teamMember.timestamp)
+                          <div style={{ float: 'right' }}>
+                            {moment
+                              .unix(teamMember.timestamp)
 
-                            .format('LTS')}
-                        </div>
-                      </ListGroup.Item>
-                    );
-                  })}
-                </ListGroup>
-                <h2>Out</h2>
-                <ListGroup>
-                  {this.state.outTeam.map((teamMember, index) => {
-                    return (
-                      <ListGroup.Item key={index} variant="danger">
-                        <div
-                          style={{
-                            float: 'left',
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}>
-                          <div>
-                            <Image
-                              style={{
-                                height: '2em',
-                                width: '2em',
-                                marginRight: '1em'
-                              }}
-                              src={teamMember.photo_url}
-                              roundedCircle></Image>
+                              .format('LTS')}
                           </div>
-                          <div>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
-                        </div>
-                        <div style={{ float: 'right' }}>
-                          {moment
-                            .unix(teamMember.timestamp)
+                        </ListGroup.Item>
+                      );
+                    })}
+                  </ListGroup>
+                </div>
+                <div id="out-group">
+                  <h2>Out</h2>
+                  <ListGroup>
+                    {this.state.outTeam.map((teamMember, index) => {
+                      return (
+                        <ListGroup.Item key={index} variant="danger">
+                          <div
+                            style={{
+                              float: 'left',
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}>
+                            <div>
+                              <Image
+                                style={{
+                                  height: '2em',
+                                  width: '2em',
+                                  marginRight: '1em'
+                                }}
+                                src={teamMember.photo_url}
+                                roundedCircle></Image>
+                            </div>
+                            <div>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
+                          </div>
+                          <div style={{ float: 'right' }}>
+                            {moment
+                              .unix(teamMember.timestamp)
 
-                            .format('LTS')}
-                        </div>
-                      </ListGroup.Item>
-                    );
-                  })}
-                </ListGroup>
+                              .format('LTS')}
+                          </div>
+                        </ListGroup.Item>
+                      );
+                    })}
+                  </ListGroup>
+                </div>
               </Col>
             </Row>
             <div>

@@ -16,6 +16,11 @@
   border: #4b2b6e;
 }
 
+.btn-success:hover {
+  background-color:  #00b277;
+  border-color:  #00b277;
+}
+
 .btn-success:disabled {
   background-color: #4b2b6e54;
   border: #4b2b6e;
@@ -37,6 +42,15 @@
 
 @media (min-width: 1200px) {
   .container {
-    max-width: 740px;
+    max-width: 1000px;
+  }
+
+  #in-group, #out-group {
+    width: 45%;
+  }
+
+  .col.group-container {
+    display: flex;
+    justify-content: space-between;
   }
 }
