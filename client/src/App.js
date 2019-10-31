@@ -39,8 +39,8 @@ export default class App extends React.Component {
 
   socket =
     process.env.NODE_ENV === 'production'
-      ? socketIOClient(this.state.prodEndpoint, {transports: ['websocket']})
-      : socketIOClient(this.state.devEndpoint, {transports: ['websocket']});
+      ? socketIOClient(this.state.prodEndpoint)
+      : socketIOClient(this.state.devEndpoint);
 
   returnIndexOfUpdatedUser = (id, teamArray) => {
     const index = teamArray.findIndex(object => object.id === id);
