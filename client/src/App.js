@@ -30,8 +30,9 @@ export default class App extends React.Component {
     inTeam: [],
     outTeam: [],
     socketDetails: {},
-    devEndpoint: 'ws://127.0.0.1:2001',
-    prodEndpoint: `ws://cats-tracker.herokuapp.com:${process.env.PORT}`,
+    devEndpoint: 'http://127.0.0.1:2001',
+    // prodEndpoint: `http://cats-tracker.herokuapp.com:${process.env.PORT}`,
+    prodEndpoint: `http://cats-tracker.herokuapp.com`,
     env: process.env.NODE_ENV,
     loading: true
   };
