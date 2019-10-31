@@ -5,8 +5,8 @@ const app = express();
 
 const http = require('http').createServer(app);
 const io = require('socket.io').listen(http);
+const Websocket = require('ws');
 
-//
 const cookieSession = require('cookie-session');
 const passport = require('passport');
 const bodyParser = require('body-parser');
@@ -51,6 +51,19 @@ io.sockets.on('connection', socket => {
   });
 });
 
-http.listen(process.env.PORT || 2001, () =>
+app.listen(process.env.PORT || 2001, () =>
   console.log("We're running on 2001")
 );
+
+// const wss = new Websocket.Server({ server: app });
+
+// wss.on('connection', ws => {
+//   console.log('Client connected');
+//   ws.on('close', () => console.log('Client disconnected'));
+// });
+
+// setInterval(() => {
+//   wss.clients.forEach((client) => {
+//     client.send(new Date().toTimeString());
+//   });
+// }, 1000);

@@ -20,6 +20,9 @@ import socketIOClient from 'socket.io-client';
 
 import * as actions from './utils';
 
+const HOST = window.location.origin.replace(/^http/, 'ws');
+const ws = new WebSocket(HOST);
+
 export default class App extends React.Component {
   state = {
     self: { in: false, isLoggedIn: false },
@@ -27,16 +30,16 @@ export default class App extends React.Component {
     inTeam: [],
     outTeam: [],
     socketDetails: {},
-    devEndpoint: 'http://127.0.0.1:2001',
-    prodEndpoint: `http://cats-tracker.herokuapp.com:${process.env.PORT}`,
+    devEndpoint: 'ws://127.0.0.1:2001',
+    prodEndpoint: `ws://cats-tracker.herokuapp.com:${process.env.PORT}`,
     env: process.env.NODE_ENV,
     loading: true
   };
 
   socket =
     process.env.NODE_ENV === 'production'
-      ? socketIOClient(this.state.prodEndpoint)
-      : socketIOClient(this.state.devEndpoint);
+      ? socketIOClient(this.state.prodEndpoint, {transports: ['websocket']})
+      : socketIOClient(this.state.devEndpoint, {transports: ['websocket']});
 
   returnIndexOfUpdatedUser = (id, teamArray) => {
     const index = teamArray.findIndex(object => object.id === id);
@@ -69,11 +72,19 @@ export default class App extends React.Component {
   };
 
   componentDidMount = async () => {
+    // ws.onmessage = function(event) {
+    //   console.log(event);
+    // };
+
     this.socket.on('arrival', details => {
       if (process.env.NODE_ENV === 'development') {
         console.log({ details });
         console.log({ state: this.state });
       }
+
+      console.log(
+        this.returnIndexOfUpdatedUser(details.user.id, this.state.team)
+      );
 
       if (details.currentlyIn) {
         const index = this.returnIndexOfUpdatedUser(
@@ -86,8 +97,7 @@ export default class App extends React.Component {
 
         this.setState({ inTeam: newTeam });
       } else if (
-        this.returnIndexOfUpdatedUser(details.user.id, this.state.inTeam) < 0 &&
-        this.returnIndexOfUpdatedUser(details.user.id, this.state.outTeam) < 0
+        this.returnIndexOfUpdatedUser(details.user.id, this.state.team) < 0
       ) {
         this.setState({
           inTeam: [
@@ -96,14 +106,18 @@ export default class App extends React.Component {
           ]
         });
       } else {
+        console.log('we made it here');
         const tempOutTeam = [...this.state.outTeam];
 
         const memberToTransfer = tempOutTeam.splice(
           this.returnIndexOfUpdatedUser(details.user.id, this.state.outTeam),
           1
         )[0];
+        console.log(memberToTransfer);
 
         memberToTransfer.departure = details.departure.timestamp;
+
+        console.log(memberToTransfer);
 
         this.setState({
           inTeam: [
@@ -125,10 +139,6 @@ export default class App extends React.Component {
       ...this.state,
       team: recentDepartures
     });
-
-    const splitTeams = this.splitTeam(this.state.team);
-
-    this.setState({ inTeam: splitTeams.inUsers, outTeam: splitTeams.outUsers });
 
     if (this.state.self.isLoggedIn) {
       if (
@@ -152,6 +162,9 @@ export default class App extends React.Component {
         }
       }
     }
+
+    const splitTeams = this.splitTeam(this.state.team);
+    this.setState({ inTeam: splitTeams.inUsers, outTeam: splitTeams.outUsers });
 
     this.setState({ loading: false });
   };
@@ -217,7 +230,7 @@ export default class App extends React.Component {
                 </Nav>
                 {this.state.self.isLoggedIn ? (
                   <Button
-                    disabled={this.state.self.in}
+                    // disabled={this.state.self.in}
                     onClick={this.handleCheckInClick}
                     variant="success">
                     Check in
