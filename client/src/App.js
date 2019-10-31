@@ -181,7 +181,6 @@ export default class App extends React.Component {
 
   componentDidUpdate = () => {
     if (process.env.NODE_ENV === 'development') {
-      console.log({ details });
       console.log({ state: this.state });
     }
   };
