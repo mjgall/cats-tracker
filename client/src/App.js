@@ -28,7 +28,7 @@ export default class App extends React.Component {
     outTeam: [],
     socketDetails: {},
     devEndpoint: 'http://127.0.0.1:2001',
-    prodEndpoint: 'http://cats-tracker.herokuapp.com',
+    prodEndpoint: `http://cats-tracker.herokuapp.com:${process.env.PORT}`,
     env: process.env.NODE_ENV,
     loading: true
   };
@@ -39,7 +39,8 @@ export default class App extends React.Component {
       : socketIOClient(this.state.devEndpoint);
 
   returnIndexOfUpdatedUser = (id, teamArray) => {
-    const index = teamArray.findIndex(object => object.users_id === id);
+
+    const index = teamArray.findIndex(object => object.id === id);
     return index;
   };
 
@@ -70,6 +71,7 @@ export default class App extends React.Component {
 
   componentDidMount = async () => {
     this.socket.on('arrival', details => {
+
       if (details.currentlyIn) {
         const index = this.returnIndexOfUpdatedUser(
           details.user.id,
@@ -78,19 +80,35 @@ export default class App extends React.Component {
 
         const newTeam = [...this.state.inTeam];
         newTeam[index].timestamp = details.departure.timestamp;
-        this.setState({ inTeam: newTeam });
-      } else {
-        const index = this.returnIndexOfUpdatedUser(
-          details.user.id,
-          this.state.outTeam
-        );
 
-        const newOutTeam = [...this.state.outTeam];
-        const transferredMember = newOutTeam.splice(index, 1)[0];
-        transferredMember.timestamp = transferredMember.timestamp =
-          details.departure.timestamp;
-        const newInTeam = [transferredMember, ...this.state.inTeam];
-        this.setState({ outTeam: newOutTeam, inTeam: newInTeam });
+        this.setState({ inTeam: newTeam });
+      } else if (
+        this.returnIndexOfUpdatedUser(details.user.id, this.state.team) < 0
+      ) {
+        this.setState({
+          inTeam: [
+            ...this.state.inTeam,
+            { ...details.user, timestamp: details.departure.timestamp }
+          ]
+        });
+      } else {
+        const tempOutTeam = [...this.state.outTeam];
+
+        const memberToTransfer = tempOutTeam.splice(
+          this.returnIndexOfUpdatedUser(details.user.id, this.state.outTeam),
+          1
+        )[0];
+
+   
+        memberToTransfer.departure = details.departure.timestamp;
+
+        this.setState({
+          inTeam: [
+            ...this.state.inTeam,
+            { ...memberToTransfer, timestamp: details.departure.timestamp }
+          ],
+          outTeam: tempOutTeam
+        });
       }
     });
 
@@ -110,11 +128,10 @@ export default class App extends React.Component {
     this.setState({ inTeam: splitTeams.inUsers, outTeam: splitTeams.outUsers });
 
     if (this.state.self.isLoggedIn) {
-      console.log(this.state.team);
-
+ 
       if (
         this.state.team.some(teamMember => {
-          if (teamMember.users_id === this.state.self.id) {
+          if (teamMember.id === this.state.self.id) {
             return true;
           } else {
             return false;
@@ -123,7 +140,7 @@ export default class App extends React.Component {
       ) {
         const currentUserLatestDeparture = this.state.team.filter(
           teamMember => {
-            return teamMember.users_id === this.state.self.id;
+            return teamMember.id === this.state.self.id;
           }
         )[0].timestamp;
         const now = parseInt(Date.now() / 1000);
@@ -160,127 +177,131 @@ export default class App extends React.Component {
     this.setState({ self: { ...this.state.self, in: true } });
   };
 
+  componentDidUpdate = () => {
+    console.log(this.state);
+  };
+
   render() {
     return (
       <Container>
-        {this.state.loading ? (
-          <div style={{ position: 'fixed', top: '50%', left: '50%' }}>
+        { this.state.loading ? (
+          <div style={ { position: 'fixed', top: '50%', left: '50%' } }>
             <Spinner animation="border" role="status"></Spinner>
           </div>
         ) : (
-          <div>
-            <Navbar expand="md">
-              <Navbar.Brand>
-                <Image src={fullLogo}></Image>
-              </Navbar.Brand>
-
-              <Navbar.Toggle aria-controls="basic-navbar-nav" />
-              <Navbar.Collapse id="basic-navbar-nav">
-                <Nav style={{ textAlign: 'center' }}>
-                  {this.state.self.email}
-                </Nav>
-                <Nav className="ml-auto">
-                  {this.state.self.isLoggedIn ? (
-                    <Nav.Link href="/api/logout">
-                      <Button variant="outline-secondary">Log Out</Button>
-                    </Nav.Link>
-                  ) : (
-                    <Nav.Link href="/auth/google">
-                      <Button variant="outline-secondary">Log In</Button>
-                    </Nav.Link>
-                  )}
-                </Nav>
-                {this.state.self.isLoggedIn ? (
-                  <Button
-                    disabled={this.state.self.in}
-                    onClick={this.handleCheckInClick}
-                    variant="success">
-                    Check in
-                  </Button>
-                ) : null}
-              </Navbar.Collapse>
-            </Navbar>
-            <Row>
-              <Col className="group-container">
-                <div id="in-group">
-                  <h2>In</h2>
-                  <ListGroup>
-                    {this.state.inTeam.map((teamMember, index) => {
-                      return (
-                        <ListGroup.Item key={index} variant="success">
-                          <div
-                            style={{
-                              float: 'left',
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}>
-                            <div>
-                              <Image
-                                style={{
-                                  height: '2em',
-                                  width: '2em',
-                                  marginRight: '1em'
-                                }}
-                                src={teamMember.photo_url}
-                                roundedCircle></Image>
-                            </div>
-                            <span>{`${teamMember.first_name} ${teamMember.last_name}`}</span>
-                          </div>
-                          <div style={{ float: 'right' }}>
-                            {moment
-                              .unix(teamMember.timestamp)
-
-                              .format('LTS')}
-                          </div>
-                        </ListGroup.Item>
-                      );
-                    })}
-                  </ListGroup>
-                </div>
-                <div id="out-group">
-                  <h2>Out</h2>
-                  <ListGroup>
-                    {this.state.outTeam.map((teamMember, index) => {
-                      return (
-                        <ListGroup.Item key={index} variant="danger">
-                          <div
-                            style={{
-                              float: 'left',
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}>
-                            <div>
-                              <Image
-                                style={{
-                                  height: '2em',
-                                  width: '2em',
-                                  marginRight: '1em'
-                                }}
-                                src={teamMember.photo_url}
-                                roundedCircle></Image>
-                            </div>
-                            <div>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
-                          </div>
-                          <div style={{ float: 'right' }}>
-                            {moment
-                              .unix(teamMember.timestamp)
-
-                              .format('LTS')}
-                          </div>
-                        </ListGroup.Item>
-                      );
-                    })}
-                  </ListGroup>
-                </div>
-              </Col>
-            </Row>
             <div>
-              {this.state.socketDetails.arrival
-                ? this.state.socketDetails.arrival.timestamp
-                : null}
+              <Navbar expand="md">
+                <Navbar.Brand>
+                  <Image src={ fullLogo }></Image>
+                </Navbar.Brand>
+
+                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                <Navbar.Collapse id="basic-navbar-nav">
+                  <Nav style={ { textAlign: 'center' } }>
+                    { this.state.self.email }
+                  </Nav>
+                  <Nav className="ml-auto">
+                    { this.state.self.isLoggedIn ? (
+                      <Nav.Link href="/api/logout">
+                        <Button variant="outline-secondary">Log Out</Button>
+                      </Nav.Link>
+                    ) : (
+                        <Nav.Link href="/auth/google">
+                          <Button variant="outline-secondary">Log In</Button>
+                        </Nav.Link>
+                      ) }
+                  </Nav>
+                  { this.state.self.isLoggedIn ? (
+                    <Button
+                      disabled={ this.state.self.in }
+                      onClick={ this.handleCheckInClick }
+                      variant="success">
+                      Check in
+                  </Button>
+                  ) : null }
+                </Navbar.Collapse>
+              </Navbar>
+              <Row>
+                <Col className="group-container">
+                  <div id="in-group">
+                    <h2>In</h2>
+                    <ListGroup>
+                      { this.state.inTeam.map((teamMember, index) => {
+                        return (
+                          <ListGroup.Item key={ index } variant="success">
+                            <div
+                              style={ {
+                                float: 'left',
+                                display: 'flex',
+                                alignItems: 'center'
+                              } }>
+                              <div>
+                                <Image
+                                  style={ {
+                                    height: '2em',
+                                    width: '2em',
+                                    marginRight: '1em'
+                                  } }
+                                  src={ teamMember.photo_url }
+                                  roundedCircle></Image>
+                              </div>
+                              <span>{ `${teamMember.first_name} ${teamMember.last_name}` }</span>
+                            </div>
+                            <div style={ { float: 'right' } }>
+                              { moment
+                                .unix(teamMember.timestamp)
+
+                                .format('LTS') }
+                            </div>
+                          </ListGroup.Item>
+                        );
+                      }) }
+                    </ListGroup>
+                  </div>
+                  <div id="out-group">
+                    <h2>Out</h2>
+                    <ListGroup>
+                      { this.state.outTeam.map((teamMember, index) => {
+                        return (
+                          <ListGroup.Item key={ index } variant="danger">
+                            <div
+                              style={ {
+                                float: 'left',
+                                display: 'flex',
+                                alignItems: 'center'
+                              } }>
+                              <div>
+                                <Image
+                                  style={ {
+                                    height: '2em',
+                                    width: '2em',
+                                    marginRight: '1em'
+                                  } }
+                                  src={ teamMember.photo_url }
+                                  roundedCircle></Image>
+                              </div>
+                              <div>{ `${teamMember.first_name} ${teamMember.last_name}` }</div>
+                            </div>
+                            <div style={ { float: 'right' } }>
+                              { moment
+                                .unix(teamMember.timestamp)
+
+                                .format('LTS') }
+                            </div>
+                          </ListGroup.Item>
+                        );
+                      }) }
+                    </ListGroup>
+                  </div>
+                </Col>
+              </Row>
+              <div>
+                { this.state.socketDetails.arrival
+                  ? this.state.socketDetails.arrival.timestamp
+                  : null }
+              </div>
             </div>
-          </div>
-        )}
+          ) }
       </Container>
     );
   }
