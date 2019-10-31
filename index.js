@@ -51,7 +51,7 @@ io.sockets.on('connection', socket => {
   });
 });
 
-app.listen(process.env.PORT || 2001, () =>
+http.listen(process.env.PORT || 2001, () =>
   console.log("We're running on 2001")
 );
 
