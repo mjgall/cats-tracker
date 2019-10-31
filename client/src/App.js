@@ -110,13 +110,27 @@ export default class App extends React.Component {
     this.setState({ inTeam: splitTeams.inUsers, outTeam: splitTeams.outUsers });
 
     if (this.state.self.isLoggedIn) {
-      const currentUserLatestDeparture = this.state.team.filter(teamMember => {
-        return teamMember.users_id === this.state.self.id;
-      })[0].timestamp;
-      const now = parseInt((Date.now() / 1000))
+      console.log(this.state.team);
 
-      if (now < currentUserLatestDeparture) {
-        this.setState({ self: { ...this.state.self, in: true } });
+      if (
+        this.state.team.some(teamMember => {
+          if (teamMember.users_id === this.state.self.id) {
+            return true;
+          } else {
+            return false;
+          }
+        })
+      ) {
+        const currentUserLatestDeparture = this.state.team.filter(
+          teamMember => {
+            return teamMember.users_id === this.state.self.id;
+          }
+        )[0].timestamp;
+        const now = parseInt(Date.now() / 1000);
+
+        if (now < currentUserLatestDeparture) {
+          this.setState({ self: { ...this.state.self, in: true } });
+        }
       }
     }
 
@@ -124,7 +138,6 @@ export default class App extends React.Component {
   };
 
   handleCheckInClick = async () => {
-
     //returns the departure
     const departure = await actions.newArrival(this.state.self);
 
