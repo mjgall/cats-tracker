@@ -20,8 +20,6 @@ import socketIOClient from 'socket.io-client';
 
 import * as actions from './utils';
 
-const HOST = window.location.origin.replace(/^http/, 'ws');
-const ws = new WebSocket(HOST);
 
 export default class App extends React.Component {
   state = {
@@ -31,7 +29,6 @@ export default class App extends React.Component {
     outTeam: [],
     socketDetails: {},
     devEndpoint: 'http://127.0.0.1:2001',
-    // prodEndpoint: `http://cats-tracker.herokuapp.com:${process.env.PORT}`,
     prodEndpoint: `http://cats-tracker.herokuapp.com`,
     env: process.env.NODE_ENV,
     loading: true
@@ -73,9 +70,6 @@ export default class App extends React.Component {
   };
 
   componentDidMount = async () => {
-    // ws.onmessage = function(event) {
-    //   console.log(event);
-    // };
 
     this.socket.on('arrival', details => {
       if (process.env.NODE_ENV === 'development') {
