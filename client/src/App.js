@@ -29,7 +29,7 @@ export default class App extends React.Component {
     outTeam: [],
     socketDetails: {},
     devEndpoint: 'http://127.0.0.1:2001',
-    prodEndpoint: `http://cats-tracker.herokuapp.com`,
+    prodEndpoint: window.location.origin,
     env: process.env.NODE_ENV,
     loading: true
   };
