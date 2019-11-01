@@ -17,3 +17,33 @@ export const newArrival = async user => {
   console.log(departure.data);
   return departure.data;
 };
+
+export const returnIndexOfUpdatedUser = (id, teamArray) => {
+  const index = teamArray.findIndex(object => object.id === id);
+  return index;
+};
+
+export const isWithinEightHours = timestamp => {
+  const now = (Date.now() / 1000).toFixed(0);
+  const arrival = timestamp - 60 * 60 * 8;
+  const departure = timestamp;
+
+  if (now > arrival && now < departure) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const splitTeam = arrayOfUsers => {
+  let inUsers = [];
+  let outUsers = [];
+  arrayOfUsers.forEach(user => {
+    if (isWithinEightHours(user.timestamp)) {
+      inUsers.push(user);
+    } else {
+      outUsers.push(user);
+    }
+  });
+  return { inUsers, outUsers };
+};

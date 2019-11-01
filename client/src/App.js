@@ -10,6 +10,7 @@ import {
   Button,
   Image
 } from 'react-bootstrap';
+
 import fullLogo from './cats-logo.png';
 import './App.css';
 
@@ -39,35 +40,7 @@ export default class App extends React.Component {
       ? socketIOClient(this.state.prodEndpoint)
       : socketIOClient(this.state.devEndpoint);
 
-  returnIndexOfUpdatedUser = (id, teamArray) => {
-    const index = teamArray.findIndex(object => object.id === id);
-    return index;
-  };
 
-  isWithinEightHours = timestamp => {
-    const now = (Date.now() / 1000).toFixed(0);
-    const arrival = timestamp - 60 * 60 * 8;
-    const departure = timestamp;
-
-    if (now > arrival && now < departure) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  splitTeam = arrayOfUsers => {
-    let inUsers = [];
-    let outUsers = [];
-    arrayOfUsers.forEach(user => {
-      if (this.isWithinEightHours(user.timestamp)) {
-        inUsers.push(user);
-      } else {
-        outUsers.push(user);
-      }
-    });
-    return { inUsers, outUsers };
-  };
 
   componentDidMount = async () => {
 
@@ -78,11 +51,11 @@ export default class App extends React.Component {
       }
 
       console.log(
-        this.returnIndexOfUpdatedUser(details.user.id, this.state.team)
+        actions.returnIndexOfUpdatedUser(details.user.id, this.state.team)
       );
 
       if (details.currentlyIn) {
-        const index = this.returnIndexOfUpdatedUser(
+        const index = actions.returnIndexOfUpdatedUser(
           details.user.id,
           this.state.inTeam
         );
@@ -92,7 +65,7 @@ export default class App extends React.Component {
 
         this.setState({ inTeam: newTeam });
       } else if (
-        this.returnIndexOfUpdatedUser(details.user.id, this.state.team) < 0
+        actions.returnIndexOfUpdatedUser(details.user.id, this.state.team) < 0
       ) {
         this.setState({
           inTeam: [
@@ -105,7 +78,7 @@ export default class App extends React.Component {
         const tempOutTeam = [...this.state.outTeam];
 
         const memberToTransfer = tempOutTeam.splice(
-          this.returnIndexOfUpdatedUser(details.user.id, this.state.outTeam),
+          actions.returnIndexOfUpdatedUser(details.user.id, this.state.outTeam),
           1
         )[0];
         console.log(memberToTransfer);
@@ -158,7 +131,7 @@ export default class App extends React.Component {
       }
     }
 
-    const splitTeams = this.splitTeam(this.state.team);
+    const splitTeams = actions.splitTeam(this.state.team);
     this.setState({ inTeam: splitTeams.inUsers, outTeam: splitTeams.outUsers });
 
     this.setState({ loading: false });
@@ -169,7 +142,7 @@ export default class App extends React.Component {
     const departure = await actions.newArrival(this.state.self);
 
     if (
-      this.returnIndexOfUpdatedUser(this.state.self.id, this.state.inTeam) > -1
+      actions.returnIndexOfUpdatedUser(this.state.self.id, this.state.inTeam) > -1
     ) {
       this.socket.emit('arrival', {
         user: this.state.self,
@@ -225,7 +198,7 @@ export default class App extends React.Component {
                 </Nav>
                 {this.state.self.isLoggedIn ? (
                   <Button
-                    // disabled={this.state.self.in}
+                    disabled={this.state.self.in}
                     onClick={this.handleCheckInClick}
                     variant="success">
                     Check in
