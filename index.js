@@ -42,7 +42,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 io.sockets.on('connection', (socket) => {
-  console.log(socket);
 
   console.log('a user connected');
   socket.on('arrival', details => {
