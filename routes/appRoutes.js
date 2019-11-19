@@ -5,6 +5,8 @@ const mostRecentUserArrival = require('../queries/mostRecentUserArrival');
 const mostRecentUserDeparture = require('../queries/mostRecentUserDeparture');
 const getMostRecentDepartures = require('../queries/getMostRecentDepartures');
 
+const Sentry = require('../services/sentry');
+
 module.exports = app => {
   app.get('/api/debug-sentry', function mainHandler(req, res) {
     console.log('Sentry debug error test');
@@ -16,7 +18,7 @@ module.exports = app => {
       const team = await getTeam();
       res.send(team);
     } catch (error) {
-      throw error;
+      Sentry.captureException(error)
     }
   });
 
@@ -25,7 +27,7 @@ module.exports = app => {
       const mostRecentDepartures = await getMostRecentDepartures();
       res.send(mostRecentDepartures);
     } catch (error) {
-      throw error;
+      Sentry.captureException(error)
     }
   });
 
@@ -34,7 +36,7 @@ module.exports = app => {
       const arrival = await addArrival(req.body);
       res.send(arrival);
     } catch (error) {
-      throw error;
+      Sentry.captureException(error)
     }
   });
 
@@ -43,7 +45,7 @@ module.exports = app => {
       const departure = await addDeparture(req.body);
       res.send(departure);
     } catch (error) {
-      throw error;
+      Sentry.captureException(error)
     }
   });
 
@@ -52,7 +54,7 @@ module.exports = app => {
       const arrival = await mostRecentUserArrival(req.params.user_id);
       res.send(arrival);
     } catch (error) {
-      throw error;
+      Sentry.captureException(error)
     }
   });
 
@@ -61,7 +63,7 @@ module.exports = app => {
       const departure = await mostRecentUserDeparture(req.params.user_id);
       res.send(departure);
     } catch (error) {
-      throw error;
+      Sentry.captureException(error)
     }
   });
 };
