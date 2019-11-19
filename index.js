@@ -35,10 +35,6 @@ require('./routes/authRoutes')(app);
 //APP
 require('./routes/appRoutes')(app);
 
-app.get('/api/debug-sentry', function mainHandler(req, res) {
-  throw new Error('My first Sentry error!');
-});
-
 //CONDITIONS IF DEPLOYED TO PRODUCTION
 if (process.env.NODE_ENV === 'production') {
   // Express will serve up production assets

@@ -6,6 +6,11 @@ const mostRecentUserDeparture = require('../queries/mostRecentUserDeparture');
 const getMostRecentDepartures = require('../queries/getMostRecentDepartures');
 
 module.exports = app => {
+  app.get('/api/debug-sentry', function mainHandler(req, res) {
+    console.log('Sentry debug error test');
+    throw new Error('My first Sentry error!');
+  });
+
   app.get('/api/team', async (req, res) => {
     try {
       const team = await getTeam();
