@@ -3,6 +3,10 @@ const path = require('path');
 const express = require('express');
 const app = express();
 
+const Sentry = require('@sentry/node');
+
+Sentry.init({ dsn: 'https://0a6a707c297f4f02b6013337086a5fa4@sentry.io/1826941' });
+
 const http = require('http').createServer(app);
 const io = require('socket.io').listen(http);
 
@@ -13,6 +17,8 @@ const keys = require('./config/keys');
 
 require('./services/passport');
 
+// The request handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -28,6 +34,10 @@ app.use(passport.session());
 require('./routes/authRoutes')(app);
 //APP
 require('./routes/appRoutes')(app);
+
+app.get('/api/debug-sentry', function mainHandler(req, res) {
+  throw new Error('My first Sentry error!');
+});
 
 //CONDITIONS IF DEPLOYED TO PRODUCTION
 if (process.env.NODE_ENV === 'production') {
@@ -48,6 +58,17 @@ io.sockets.on('connection', (socket) => {
     console.log(details);
     io.sockets.emit('arrival', details);
   });
+});
+
+
+// The error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
+
+app.use(function onError(err, req, res, next) {
+  // The error id is attached to `res.sentry` to be returned
+  // and optionally displayed to the user for support.
+  res.statusCode = 500;
+  res.end(res.sentry + "\n");
 });
 
 http.listen(process.env.PORT || 2001, () =>
