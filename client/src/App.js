@@ -183,6 +183,10 @@ export default class App extends React.Component {
     }
   };
 
+  componentWillUnmount = () => {
+    this.socket.disconnect();
+  }
+
   render() {
     if (!this.state.error) {
       return (
