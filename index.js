@@ -46,7 +46,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 io.sockets.on('connection', socket => {
-  console.log('a user connected');
+  console.log(`Connected - IP: ${socket.handshake.address.replace('::ffff:', '')}`);
   socket.on('arrival', details => {
     console.log(details);
     io.sockets.emit('arrival', details);
