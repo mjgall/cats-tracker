@@ -228,7 +228,7 @@ export default class App extends React.Component {
                   </Nav>
                   {this.state.self.isLoggedIn ? (
                     <Button
-                      // disabled={this.state.self.in}
+                      disabled={this.state.self.in}
                       onClick={this.handleCheckInClick}
                       variant="success">
                       Check in
