@@ -99,16 +99,24 @@ export default class App extends React.Component {
         }
       });
 
-      const currentUser = await axios.get('/api/current_user');
-      if (currentUser.data) {
-        this.setState({ self: { ...currentUser.data, isLoggedIn: true } });
+      try {
+        const currentUser = await axios.get('/api/current_user');
+        if (currentUser.data) {
+          this.setState({ self: { ...currentUser.data, isLoggedIn: true } });
+        }
+      } catch (error) {
+        this.setState({ error: true, errorDetails: error });
       }
 
-      const recentDepartures = await actions.getTeamDepartures();
-      this.setState({
-        ...this.state,
-        team: recentDepartures
-      });
+      try {
+        const recentDepartures = await actions.getTeamDepartures();
+        this.setState({
+          ...this.state,
+          team: recentDepartures
+        });
+      } catch (error) {
+        this.setState({ error: true, errorDetails: error });
+      }
 
       if (this.state.self.isLoggedIn) {
         if (
@@ -185,7 +193,7 @@ export default class App extends React.Component {
 
   componentWillUnmount = () => {
     this.socket.disconnect();
-  }
+  };
 
   render() {
     if (!this.state.error) {
@@ -220,7 +228,7 @@ export default class App extends React.Component {
                   </Nav>
                   {this.state.self.isLoggedIn ? (
                     <Button
-                      disabled={this.state.self.in}
+                      // disabled={this.state.self.in}
                       onClick={this.handleCheckInClick}
                       variant="success">
                       Check in
@@ -269,34 +277,36 @@ export default class App extends React.Component {
                     <h2>Out</h2>
                     <ListGroup>
                       {this.state.outTeam.map((teamMember, index) => {
-                        return (
-                          <ListGroup.Item key={index} variant="danger">
-                            <div
-                              style={{
-                                float: 'left',
-                                display: 'flex',
-                                alignItems: 'center'
-                              }}>
-                              <div>
-                                <Image
-                                  style={{
-                                    height: '2em',
-                                    width: '2em',
-                                    marginRight: '1em'
-                                  }}
-                                  src={teamMember.photo_url}
-                                  roundedCircle></Image>
+                        if (teamMember.email.indexOf('catsone.com') > 0) {
+                          return (
+                            <ListGroup.Item key={index} variant="danger">
+                              <div
+                                style={{
+                                  float: 'left',
+                                  display: 'flex',
+                                  alignItems: 'center'
+                                }}>
+                                <div>
+                                  <Image
+                                    style={{
+                                      height: '2em',
+                                      width: '2em',
+                                      marginRight: '1em'
+                                    }}
+                                    src={teamMember.photo_url}
+                                    roundedCircle></Image>
+                                </div>
+                                <div>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
                               </div>
-                              <div>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
-                            </div>
-                            <div style={{ float: 'right' }}>
-                              {moment
-                                .unix(teamMember.timestamp)
+                              <div style={{ float: 'right' }}>
+                                {moment
+                                  .unix(teamMember.timestamp)
 
-                                .format('LTS')}
-                            </div>
-                          </ListGroup.Item>
-                        );
+                                  .format('LTS')}
+                              </div>
+                            </ListGroup.Item>
+                          );
+                        }
                       })}
                     </ListGroup>
                   </div>

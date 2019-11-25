@@ -17,6 +17,7 @@ module.exports = user => {
                 `SELECT * FROM arrivals WHERE id = ${results.insertId}`,
                 (err, arrivals, fields) => {
                   if (err) {
+                    console.log(err);
                     reject(err);
                   }
                   resolve(arrivals[0]);
