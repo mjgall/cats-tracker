@@ -10,8 +10,16 @@ export const getTeamDepartures = async () => {
   return teamDepartures.data;
 };
 
+export const newRetroArrival = async (timestamp, userId) => {
+  console.log(timestamp, userId);
+  const arrival = await axios.post('/api/latearrival', { timestamp, userId });
+  const departure = await axios.post('/api/departure', arrival.data);
+  console.log(departure.data);
+  return departure.data;
+};
+
 export const newArrival = async user => {
-  console.log(user)
+  console.log(user);
   const arrival = await axios.post('/api/arrival', user);
   const departure = await axios.post('/api/departure', arrival.data);
   console.log(departure.data);

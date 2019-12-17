@@ -42,6 +42,8 @@ export default class App extends React.Component {
       : socketIOClient(this.state.devEndpoint);
 
   componentDidMount = async () => {
+    window.addRetroArrival = this.addRetroArrival;
+
     try {
       this.socket.on('arrival', details => {
         if (process.env.NODE_ENV === 'development') {
@@ -154,11 +156,37 @@ export default class App extends React.Component {
     }
   };
 
+  addRetroArrival = async (timestamp, userId) => {
+    try {
+      const departure = await actions.newRetroArrival(timestamp, userId);
+      if (
+        actions.returnIndexOfUpdatedUser(
+          this.state.self.id,
+          this.state.inTeam
+        ) > -1
+      ) {
+        this.socket.emit('arrival', {
+          user: this.state.self,
+          departure,
+          currentlyIn: true
+        });
+      } else {
+        this.socket.emit('arrival', {
+          user: this.state.self,
+          departure,
+          currentlyIn: false
+        });
+      }
+    } catch (error) {
+      this.setState({ error: true, errorDetails: error, loading: false });
+      console.log(error);
+    }
+  };
+
   handleCheckInClick = async () => {
     try {
       //returns the departure
       const departure = await actions.newArrival(this.state.self);
-
       if (
         actions.returnIndexOfUpdatedUser(
           this.state.self.id,

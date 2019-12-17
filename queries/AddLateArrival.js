@@ -1,14 +1,13 @@
 const db = require('../config/db/mysql').pool;
 
-module.exports = user => {
-  console.log(user)
+module.exports = (timestamp, userId) => {
   return new Promise((resolve, reject) => {
     db.getConnection((err, connection) => {
       if (err) {
         reject(err);
       }
       connection.query(
-        `INSERT INTO arrivals (user_id, timestamp) VALUES (${user.id}, UNIX_TIMESTAMP());`,
+        `INSERT INTO arrivals (user_id, timestamp) VALUES (${userId}, ${timestamp});`,
         (err, results, fields) => {
           if (err) {
             reject(err);

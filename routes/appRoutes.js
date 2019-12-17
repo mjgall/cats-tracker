@@ -1,5 +1,6 @@
 const getTeam = require('../queries/getTeam');
 const addArrival = require('../queries/addArrival');
+const addLateArrival = require('../queries/addLateArrival');
 const addDeparture = require('../queries/addDeparture');
 const mostRecentUserArrival = require('../queries/mostRecentUserArrival');
 const mostRecentUserDeparture = require('../queries/mostRecentUserDeparture');
@@ -18,7 +19,7 @@ module.exports = app => {
       const team = await getTeam();
       res.send(team);
     } catch (error) {
-      Sentry.captureException(error)
+      Sentry.captureException(error);
     }
   });
 
@@ -27,7 +28,7 @@ module.exports = app => {
       const mostRecentDepartures = await getMostRecentDepartures();
       res.send(mostRecentDepartures);
     } catch (error) {
-      Sentry.captureException(error)
+      Sentry.captureException(error);
     }
   });
 
@@ -36,7 +37,19 @@ module.exports = app => {
       const arrival = await addArrival(req.body);
       res.send(arrival);
     } catch (error) {
-      Sentry.captureException(error)
+      Sentry.captureException(error);
+    }
+  });
+
+  app.post('/api/latearrival', async (req, res) => {
+    console.log(req.body);
+    try {
+      const arrival = await addLateArrival(req.body.timestamp, req.body.userId);
+      console.log(arrival);
+      res.send(arrival);
+    } catch (error) {
+      console.log(error);
+      Sentry.captureException(error);
     }
   });
 
@@ -45,7 +58,7 @@ module.exports = app => {
       const departure = await addDeparture(req.body);
       res.send(departure);
     } catch (error) {
-      Sentry.captureException(error)
+      Sentry.captureException(error);
     }
   });
 
@@ -54,7 +67,7 @@ module.exports = app => {
       const arrival = await mostRecentUserArrival(req.params.user_id);
       res.send(arrival);
     } catch (error) {
-      Sentry.captureException(error)
+      Sentry.captureException(error);
     }
   });
 
@@ -63,7 +76,23 @@ module.exports = app => {
       const departure = await mostRecentUserDeparture(req.params.user_id);
       res.send(departure);
     } catch (error) {
-      Sentry.captureException(error)
+      Sentry.captureException(error);
+    }
+  });
+
+  app.get('/api/button-arrival/:userId', async (req, res) => {
+    //query string should have a userId on it
+    console.log(req.params)
+    const userId = req.params.userId;
+    try {
+      const arrival = await addArrival({ id: userId });
+      console.log(arrival)
+      const departure = await addDeparture(arrival);
+      res.send(departure);
+    } catch (error) {
+ 
+      Sentry.captureException(error);
+      res.send(error)
     }
   });
 };
