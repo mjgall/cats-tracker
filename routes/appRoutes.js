@@ -6,9 +6,15 @@ const mostRecentUserArrival = require('../queries/mostRecentUserArrival');
 const mostRecentUserDeparture = require('../queries/mostRecentUserDeparture');
 const getMostRecentDepartures = require('../queries/getMostRecentDepartures');
 
+
+
 const Sentry = require('../services/sentry');
 //typo in addLateArrival filename
 module.exports = app => {
+
+  const http = require('http').createServer(app);
+  const io = require('socket.io').listen(http);
+
   app.get('/api/debug-sentry', function mainHandler(req, res) {
     console.log('Sentry debug error test');
     throw new Error('My first Sentry error!');
@@ -88,6 +94,7 @@ module.exports = app => {
       const arrival = await addArrival({ id: userId });
       console.log(arrival)
       const departure = await addDeparture(arrival);
+      io.sockets.emit('arrival', details);
       res.send(departure);
     } catch (error) {
  
