@@ -1,6 +1,6 @@
 const getTeam = require('../queries/getTeam');
 const addArrival = require('../queries/addArrival');
-const addLateArrival = require('../queries/addLateArrival');
+const addLateArrival = require('../queries/addAdHocArrival');
 const addDeparture = require('../queries/addDeparture');
 const mostRecentUserArrival = require('../queries/mostRecentUserArrival');
 const mostRecentUserDeparture = require('../queries/mostRecentUserDeparture');
