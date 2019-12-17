@@ -7,7 +7,7 @@ const mostRecentUserDeparture = require('../queries/mostRecentUserDeparture');
 const getMostRecentDepartures = require('../queries/getMostRecentDepartures');
 
 const Sentry = require('../services/sentry');
-
+//typo in addLateArrival filename
 module.exports = app => {
   app.get('/api/debug-sentry', function mainHandler(req, res) {
     console.log('Sentry debug error test');
