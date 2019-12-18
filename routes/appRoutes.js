@@ -5,6 +5,7 @@ const addDeparture = require('../queries/addDeparture');
 const mostRecentUserArrival = require('../queries/mostRecentUserArrival');
 const mostRecentUserDeparture = require('../queries/mostRecentUserDeparture');
 const getMostRecentDepartures = require('../queries/getMostRecentDepartures');
+const getUserById = require('../queries/getUserById');
 
 
 const Sentry = require('../services/sentry');
