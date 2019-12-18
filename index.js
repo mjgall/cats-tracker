@@ -38,18 +38,6 @@ require('./routes/authRoutes')(app);
 //APP
 require('./routes/appRoutes')(app);
 
-//CONDITIONS IF DEPLOYED TO PRODUCTION
-if (process.env.NODE_ENV === 'production') {
-  // Express will serve up production assets
-  app.use(express.static(path.join(__dirname, 'client', 'build')));
-
-  // Express will serve up the index.html file
-  // if it doesn't recognize the route
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
-  });
-}
-
 app.get('/api/button-arrival/:userId', async (req, res) => {
   console.log('Button endpoint hit')
   const userId = req.params.userId;
@@ -100,6 +88,20 @@ app.get('/api/button-arrival/:userId', async (req, res) => {
     }
   }
 });
+
+//CONDITIONS IF DEPLOYED TO PRODUCTION
+if (process.env.NODE_ENV === 'production') {
+  // Express will serve up production assets
+  app.use(express.static(path.join(__dirname, 'client', 'build')));
+
+  // Express will serve up the index.html file
+  // if it doesn't recognize the route
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  });
+}
+
+
 
 io.sockets.on('connection', socket => {
   console.log(
