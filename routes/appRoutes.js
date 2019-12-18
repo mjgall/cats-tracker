@@ -7,13 +7,9 @@ const mostRecentUserDeparture = require('../queries/mostRecentUserDeparture');
 const getMostRecentDepartures = require('../queries/getMostRecentDepartures');
 
 
-
 const Sentry = require('../services/sentry');
-//typo in addLateArrival filename
-module.exports = app => {
 
-  const http = require('http').createServer(app);
-  const io = require('socket.io').listen(http);
+module.exports = app => {
 
   app.get('/api/debug-sentry', function mainHandler(req, res) {
     console.log('Sentry debug error test');
@@ -86,20 +82,6 @@ module.exports = app => {
     }
   });
 
-  app.get('/api/button-arrival/:userId', async (req, res) => {
-    //query string should have a userId on it
-    console.log(req.params)
-    const userId = req.params.userId;
-    try {
-      const arrival = await addArrival({ id: userId });
-      console.log(arrival)
-      const departure = await addDeparture(arrival);
-      io.sockets.emit('arrival', details);
-      res.send(departure);
-    } catch (error) {
+  
  
-      Sentry.captureException(error);
-      res.send(error)
-    }
-  });
 };

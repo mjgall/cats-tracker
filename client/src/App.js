@@ -46,6 +46,7 @@ export default class App extends React.Component {
 
     try {
       this.socket.on('arrival', details => {
+        console.log(details)
         if (process.env.NODE_ENV === 'development') {
           console.log({ details });
           console.log({ state: this.state });
