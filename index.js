@@ -51,6 +51,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.get('/api/button-arrival/:userId', async (req, res) => {
+  console.log('Button endpoint hit')
   const userId = req.params.userId;
   const user = await getUserById(userId);
 
@@ -105,7 +106,6 @@ io.sockets.on('connection', socket => {
     `Connected - IP: ${socket.handshake.address.replace('::ffff:', '')}`
   );
   socket.on('arrival', details => {
-
     io.sockets.emit('arrival', details);
   });
   socket.on('disconnect', () => {
