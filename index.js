@@ -13,11 +13,6 @@ const passport = require('passport');
 const bodyParser = require('body-parser');
 const keys = require('./config/keys');
 
-const addArrival = require('./queries/addArrival');
-const addDeparture = require('./queries/addDeparture');
-const mostRecentUserDeparture = require('./queries/mostRecentUserDeparture');
-const getUserById = require('./queries/getUserById');
-
 require('./services/passport');
 
 // The request handler must be the first middleware on the app
