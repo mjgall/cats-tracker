@@ -1,9 +1,9 @@
 const mysql = require('mysql');
 
 const pool = mysql.createPool({
-  host: 'in-out-tracker.cm7jm7eozp0m.us-west-2.rds.amazonaws.com',
+  host: 'in-out-tracker-restore.cm7jm7eozp0m.us-west-2.rds.amazonaws.com',
   user: 'admin',
-  password: '12345678',
+  password: 'inouttracker',
   port: 3306,
   database: 'tracker',
   acquireTimeout: 30000
