@@ -259,7 +259,7 @@ export default class App extends React.Component {
                 },
                 ticks: {
                   min: yFinalMin,
-                  max: '11/27/2019, 11:00:00 AM'
+                  max: yFinalMax
                 }
               }
             ]
