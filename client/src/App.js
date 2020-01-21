@@ -169,7 +169,7 @@ export default class App extends React.Component {
       //https://stackoverflow.com/questions/56835227/order-the-time-units-on-y-axis-chart-js
       const ctx = this.chartRef.current.getContext('2d');
 
-      let arrivalsFull = await actions.getUserArrivals(32);
+      let arrivalsFull = await actions.getUserArrivals(this.state.self.id);
       let arrivals = arrivalsFull.slice(
         Math.max(arrivalsFull.length - this.state.prevDays, 1)
       );
@@ -209,7 +209,7 @@ export default class App extends React.Component {
 
       new Chart(ctx, {
         type: 'line',
-
+        responsive: true,
         data: { datasets: [s1] },
         options: {
           legend: {
