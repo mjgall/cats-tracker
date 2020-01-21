@@ -423,27 +423,29 @@ export default class App extends React.Component {
                   ? this.state.socketDetails.arrival.timestamp
                   : null}
               </div>
-              <div className="reports-container">
-                <Accordion>
-                  <Card>
-                    <Accordion.Toggle
-                      as={props => (
-                        <Button
-                          {...props}
-                          className="btn-success"
-                          style={{ width: '100%' }}>
-                          Arrivals History
-                        </Button>
-                      )}
-                      eventKey="0"></Accordion.Toggle>
-                    <Accordion.Collapse eventKey="0">
-                      <Card.Body>
-                        <canvas id="myChart" ref={this.chartRef} />
-                      </Card.Body>
-                    </Accordion.Collapse>
-                  </Card>
-                </Accordion>
-              </div>
+              {this.state.self.id ? (
+                <div className="reports-container">
+                  <Accordion>
+                    <Card>
+                      <Accordion.Toggle
+                        as={props => (
+                          <Button
+                            {...props}
+                            className="btn-success"
+                            style={{ width: '100%' }}>
+                            Arrivals History
+                          </Button>
+                        )}
+                        eventKey="0"></Accordion.Toggle>
+                      <Accordion.Collapse eventKey="0">
+                        <Card.Body>
+                          <canvas id="myChart" ref={this.chartRef} />
+                        </Card.Body>
+                      </Accordion.Collapse>
+                    </Card>
+                  </Accordion>
+                </div>
+              ) : null}
             </div>
           )}
         </Container>
