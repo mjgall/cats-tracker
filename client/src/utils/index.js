@@ -55,3 +55,12 @@ export const splitTeam = arrayOfUsers => {
   });
   return { inUsers, outUsers };
 };
+
+export const getUserArrivals = async userId => {
+  try {
+    const response = await axios.get(`/api/arrivals/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error);
+  }
+};

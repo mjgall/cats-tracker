@@ -26,6 +26,9 @@
   border: #4b2b6e;
 }
 
+.reports-container {
+  margin: 10px 0;
+}
 
 @media (max-width: 768px) {
   .btn {

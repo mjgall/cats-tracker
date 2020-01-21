@@ -6,38 +6,37 @@ const mostRecentUserArrival = require('../queries/mostRecentUserArrival');
 const mostRecentUserDeparture = require('../queries/mostRecentUserDeparture');
 const getMostRecentDepartures = require('../queries/getMostRecentDepartures');
 const getUserById = require('../queries/getUserById');
-
+const getArrivalsByUser = require('../queries/getArrivalsByUser');
 
 const Sentry = require('../services/sentry');
 
 module.exports = (app, io) => {
-
   app.get('/api/button-arrival/:userId', async (req, res) => {
-    console.log('Button endpoint hit')
+    console.log('Button endpoint hit');
     const userId = req.params.userId;
     const user = await getUserById(userId);
-  
+
     const response = await mostRecentUserDeparture(userId);
-  
+
     const mostRecentDeparture = response.most_recent_departure;
-  
+
     let currentlyIn = false;
     user.isLoggedIn = false;
-  
+
     const isWithinEightHours = timestamp => {
       const now = (Date.now() / 1000).toFixed(0);
-  
+
       const arrival = timestamp - 60 * 60 * 8;
-  
+
       const departure = timestamp;
-  
+
       if (now > arrival && now < departure) {
         return true;
       } else {
         return false;
       }
     };
-  
+
     if (isWithinEightHours(mostRecentDeparture)) {
       console.log('cant check in, too soon');
       res.send("can't log in, too soon");
@@ -45,15 +44,15 @@ module.exports = (app, io) => {
       currentlyIn = false;
       try {
         const arrival = await addArrival({ id: userId });
-  
+
         const departure = await addDeparture(arrival);
-  
+
         io.emit('arrival', {
           user,
           departure,
           currentlyIn
         });
-  
+
         res.send(departure);
       } catch (error) {
         Sentry.captureException(error);
@@ -134,6 +133,16 @@ module.exports = (app, io) => {
     }
   });
 
-  
- 
+  app.get('/api/arrivals/:user_id', async (req, res) => {
+    try {
+      const arrivals = await getArrivalsByUser(req.params.user_id);
+      const organizedArray = arrivals.map(entry => {
+        return entry.timestamp
+      })
+      res.send(organizedArray)
+    } catch (error) {
+      console.log(error);
+      Sentry.captureException(error);
+    }
+  });
 };

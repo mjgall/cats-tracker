@@ -8,7 +8,9 @@ import {
   Col,
   Spinner,
   Button,
-  Image
+  Image,
+  Card,
+  Accordion
 } from 'react-bootstrap';
 
 import fullLogo from './cats-logo.png';
@@ -21,7 +23,11 @@ import socketIOClient from 'socket.io-client';
 
 import * as actions from './utils';
 
+import Chart from 'chart.js';
+
 export default class App extends React.Component {
+  chartRef = React.createRef();
+
   state = {
     self: { in: false, isLoggedIn: false },
     team: [],
@@ -46,7 +52,7 @@ export default class App extends React.Component {
 
     try {
       this.socket.on('arrival', details => {
-        console.log(details)
+        console.log(details);
         if (process.env.NODE_ENV === 'development') {
           console.log({ details });
           console.log({ state: this.state });
@@ -154,6 +160,77 @@ export default class App extends React.Component {
     } catch (error) {
       this.setState({ error: true, errorDetails: error, loading: false });
       console.log(error);
+    }
+
+    if (this.state.self.id) {
+      const myChartRef = this.chartRef.current.getContext('2d');
+
+      const arrivals = await actions.getUserArrivals(this.state.self.id);
+
+      let data = arrivals.map((timestamp, index) => ({
+        x: moment(timestamp * 1000).valueOf(),
+        y: moment(
+          `1970-02-01 ${moment(timestamp * 1000)
+            .get('hours')
+            .valueOf()}:${moment(timestamp * 1000)
+            .get('minutes')
+            .valueOf()}`
+        ).valueOf()
+      }));
+
+      new Chart(myChartRef, {
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: 'Time',
+              backgroundColor: 'rgba(75, 43, 110, 0.7)',
+              data: data,
+              pointBorderWidth: 2,
+              pointRadius: 5,
+              pointHoverRadius: 7
+            }
+          ]
+        },
+        options: {
+          scales: {
+            xAxes: [
+              {
+                type: 'time',
+                position: 'bottom',
+                time: {
+                  displayFormats: {
+                    years: 'k mm'
+                  },
+                  unit: 'day'
+                }
+              }
+            ],
+            yAxes: [
+              {
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                  min: moment('1970-02-01 07:00:00').valueOf(),
+                  max: moment('1970-02-01 10:30:00').valueOf(),
+                  stepSize: 3.6e6 / 2,
+                  beginAtZero: false,
+                  callback: value => {
+                    let date = moment(value);
+                    if (
+                      date.diff(moment('1970-02-01 23:59:59'), 'minutes') === 0
+                    ) {
+                      return null;
+                    }
+
+                    return date.format('h:mm A');
+                  }
+                }
+              }
+            ]
+          }
+        }
+      });
     }
   };
 
@@ -345,6 +422,27 @@ export default class App extends React.Component {
                 {this.state.socketDetails.arrival
                   ? this.state.socketDetails.arrival.timestamp
                   : null}
+              </div>
+              <div className="reports-container">
+                <Accordion>
+                  <Card>
+                    <Accordion.Toggle
+                      as={props => (
+                        <Button
+                          {...props}
+                          className="btn-success"
+                          style={{ width: '100%' }}>
+                          Arrivals History
+                        </Button>
+                      )}
+                      eventKey="0"></Accordion.Toggle>
+                    <Accordion.Collapse eventKey="0">
+                      <Card.Body>
+                        <canvas id="myChart" ref={this.chartRef} />
+                      </Card.Body>
+                    </Accordion.Collapse>
+                  </Card>
+                </Accordion>
               </div>
             </div>
           )}
