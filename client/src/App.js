@@ -177,8 +177,9 @@ export default class App extends React.Component {
       const s1 = {
         label: 'Arrival',
         borderColor: '#4b2b6e',
+        lineTension: 0,
         data: arrivals.filter(arrival => {
-          if (new Date(arrival*1000).getHours() > 11 || new Date(arrival*1000).getHours() < 7) {
+          if (new Date(arrival*1000).getHours() > 11 || new Date(arrival*1000).getHours() < 7 || new Date(arrival*1000).getDay() === 0 || new Date(arrival*1000).getDay() === 0) {
             return false
           }
           return true
@@ -212,14 +213,31 @@ export default class App extends React.Component {
         })
       };
 
+      const yFormatted = new Date(arrivals[0] * 1000);
+      const yFinalMin = new Date(
+        yFormatted.getFullYear(),
+        yFormatted.getMonth(),
+        yFormatted.getDate(),
+        7,
+        0,
+        0
+      ).toLocaleString();
+      const yFinalMax = new Date(
+        yFormatted.getFullYear(),
+        yFormatted.getMonth(),
+        yFormatted.getDate(),
+        11,
+        0,
+        0
+      ).toLocaleString();
    
       new Chart(ctx, {
         type: 'line',
         responsive: true,
-        data: { datasets: [s1] },
+        data: { datasets: [s1], },
         options: {
           legend: {
-            display: false
+            display: true
           },
           scales: {
             xAxes: [
@@ -240,7 +258,8 @@ export default class App extends React.Component {
                   unit: 'hour'
                 },
                 ticks: {
-                  beginAtZero: true
+                  min: yFinalMin,
+                  max: '11/27/2019, 11:00:00 AM'
                 }
               }
             ]
