@@ -178,6 +178,7 @@ export default class App extends React.Component {
         label: 'Arrival',
         borderColor: '#4b2b6e',
         lineTension: 0,
+        fill: false,
         data: arrivals.filter(arrival => {
           if (new Date(arrival*1000).getHours() > 11 || new Date(arrival*1000).getHours() < 7 || new Date(arrival*1000).getDay() === 0 || new Date(arrival*1000).getDay() === 0) {
             return false
