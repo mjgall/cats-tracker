@@ -177,7 +177,12 @@ export default class App extends React.Component {
       const s1 = {
         label: 'Arrival',
         borderColor: '#4b2b6e',
-        data: arrivals.map((arrival, index) => {
+        data: arrivals.filter(arrival => {
+          if (new Date(arrival*1000).getHours() > 11 || new Date(arrival*1000).getHours() < 7) {
+            return false
+          }
+          return true
+        }).map((arrival, index) => {
           arrival = arrival * 1000;
 
           const xFormatted = new Date(arrival);
@@ -207,6 +212,7 @@ export default class App extends React.Component {
         })
       };
 
+   
       new Chart(ctx, {
         type: 'line',
         responsive: true,
