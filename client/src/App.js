@@ -10,7 +10,9 @@ import {
   Button,
   Image,
   Card,
-  Accordion
+  Accordion,
+  InputGroup,
+  FormControl
 } from 'react-bootstrap';
 
 import fullLogo from './cats-logo.png';
@@ -39,7 +41,8 @@ export default class App extends React.Component {
     env: process.env.NODE_ENV,
     loading: true,
     error: false,
-    errorDetails: {}
+    errorDetails: {},
+    prevDays: 25
   };
 
   socket =
@@ -163,68 +166,75 @@ export default class App extends React.Component {
     }
 
     if (this.state.self.id) {
-      const myChartRef = this.chartRef.current.getContext('2d');
+      //https://stackoverflow.com/questions/56835227/order-the-time-units-on-y-axis-chart-js
+      const ctx = this.chartRef.current.getContext('2d');
 
-      const arrivals = await actions.getUserArrivals(this.state.self.id);
+      let arrivalsFull = await actions.getUserArrivals(32);
+      let arrivals = arrivalsFull.slice(
+        Math.max(arrivalsFull.length - this.state.prevDays, 1)
+      );
 
-      let data = arrivals.map((timestamp, index) => ({
-        x: moment(timestamp * 1000).valueOf(),
-        y: moment(
-          `1970-02-01 ${moment(timestamp * 1000)
-            .get('hours')
-            .valueOf()}:${moment(timestamp * 1000)
-            .get('minutes')
-            .valueOf()}`
-        ).valueOf()
-      }));
+      const s1 = {
+        label: 'Arrival',
+        borderColor: '#4b2b6e',
+        data: arrivals.map((arrival, index) => {
+          arrival = arrival * 1000;
 
-      new Chart(myChartRef, {
+          const xFormatted = new Date(arrival);
+          const xFinal = new Date(
+            xFormatted.getFullYear(),
+            xFormatted.getMonth(),
+            xFormatted.getDate(),
+            0,
+            0,
+            0
+          ).toLocaleString();
+
+          const yFormatted = new Date(arrivals[0] * 1000);
+          const yArrival = new Date(arrival);
+          const yFinal = new Date(
+            yFormatted.getFullYear(),
+            yFormatted.getMonth(),
+            yFormatted.getDate(),
+            yArrival.getHours(),
+            yArrival.getMinutes(),
+            yArrival.getSeconds()
+          ).toLocaleString();
+          const x = xFinal;
+          const y = yFinal;
+          console.log(x, y);
+          return { x, y };
+        })
+      };
+
+      new Chart(ctx, {
         type: 'line',
-        data: {
-          datasets: [
-            {
-              label: 'Time',
-              backgroundColor: 'rgba(75, 43, 110, 0.7)',
-              data: data,
-              pointBorderWidth: 2,
-              pointRadius: 5,
-              pointHoverRadius: 7
-            }
-          ]
-        },
+
+        data: { datasets: [s1] },
         options: {
+          legend: {
+            display: false
+          },
           scales: {
             xAxes: [
               {
                 type: 'time',
-                position: 'bottom',
+                weight: 0,
                 time: {
-                  displayFormats: {
-                    years: 'k mm'
-                  },
                   unit: 'day'
                 }
               }
             ],
             yAxes: [
               {
-                type: 'linear',
-                position: 'left',
+                type: 'time',
+                // type: 'linear',
+                reverse: false,
+                time: {
+                  unit: 'hour'
+                },
                 ticks: {
-                  min: moment('1970-02-01 07:00:00').valueOf(),
-                  max: moment('1970-02-01 10:30:00').valueOf(),
-                  stepSize: 3.6e6 / 2,
-                  beginAtZero: false,
-                  callback: value => {
-                    let date = moment(value);
-                    if (
-                      date.diff(moment('1970-02-01 23:59:59'), 'minutes') === 0
-                    ) {
-                      return null;
-                    }
-
-                    return date.format('h:mm A');
-                  }
+                  beginAtZero: true
                 }
               }
             ]
@@ -439,6 +449,7 @@ export default class App extends React.Component {
                         eventKey="0"></Accordion.Toggle>
                       <Accordion.Collapse eventKey="0">
                         <Card.Body>
+                          
                           <canvas id="myChart" ref={this.chartRef} />
                         </Card.Body>
                       </Accordion.Collapse>
