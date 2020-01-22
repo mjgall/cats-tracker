@@ -6,7 +6,7 @@ const app = express();
 const Sentry = require('./services/sentry');
 
 const http = require('http').createServer(app);
-const io = require('socket.io').listen(http);
+const io = require('socket.io').listen(http, {transports: ['polling']});
 
 const cookieSession = require('cookie-session');
 const passport = require('passport');
