@@ -12,7 +12,8 @@ import {
   Card,
   Accordion,
   InputGroup,
-  FormControl
+  FormControl,
+  
 } from 'react-bootstrap';
 
 import fullLogo from './cats-logo.png';
@@ -179,39 +180,46 @@ export default class App extends React.Component {
         borderColor: '#4b2b6e',
         lineTension: 0,
         fill: false,
-        data: arrivals.filter(arrival => {
-          if (new Date(arrival*1000).getHours() > 11 || new Date(arrival*1000).getHours() < 7 || new Date(arrival*1000).getDay() === 0 || new Date(arrival*1000).getDay() === 0) {
-            return false
-          }
-          return true
-        }).map((arrival, index) => {
-          arrival = arrival * 1000;
+        data: arrivals
+          .filter(arrival => {
+            if (
+              new Date(arrival * 1000).getHours() > 11 ||
+              new Date(arrival * 1000).getHours() < 7 ||
+              new Date(arrival * 1000).getDay() === 0 ||
+              new Date(arrival * 1000).getDay() === 0
+            ) {
+              return false;
+            }
+            return true;
+          })
+          .map((arrival, index) => {
+            arrival = arrival * 1000;
 
-          const xFormatted = new Date(arrival);
-          const xFinal = new Date(
-            xFormatted.getFullYear(),
-            xFormatted.getMonth(),
-            xFormatted.getDate(),
-            0,
-            0,
-            0
-          ).toLocaleString();
+            const xFormatted = new Date(arrival);
+            const xFinal = new Date(
+              xFormatted.getFullYear(),
+              xFormatted.getMonth(),
+              xFormatted.getDate(),
+              0,
+              0,
+              0
+            ).toLocaleString();
 
-          const yFormatted = new Date(arrivals[0] * 1000);
-          const yArrival = new Date(arrival);
-          const yFinal = new Date(
-            yFormatted.getFullYear(),
-            yFormatted.getMonth(),
-            yFormatted.getDate(),
-            yArrival.getHours(),
-            yArrival.getMinutes(),
-            yArrival.getSeconds()
-          ).toLocaleString();
-          const x = xFinal;
-          const y = yFinal;
-          console.log(x, y);
-          return { x, y };
-        })
+            const yFormatted = new Date(arrivals[0] * 1000);
+            const yArrival = new Date(arrival);
+            const yFinal = new Date(
+              yFormatted.getFullYear(),
+              yFormatted.getMonth(),
+              yFormatted.getDate(),
+              yArrival.getHours(),
+              yArrival.getMinutes(),
+              yArrival.getSeconds()
+            ).toLocaleString();
+            const x = xFinal;
+            const y = yFinal;
+            console.log(x, y);
+            return { x, y };
+          })
       };
 
       const yFormatted = new Date(arrivals[0] * 1000);
@@ -231,11 +239,11 @@ export default class App extends React.Component {
         0,
         0
       ).toLocaleString();
-   
+
       new Chart(ctx, {
         type: 'line',
         responsive: true,
-        data: { datasets: [s1], },
+        data: { datasets: [s1] },
         options: {
           legend: {
             display: true
@@ -338,162 +346,178 @@ export default class App extends React.Component {
   };
 
   render() {
-    if (!this.state.error) {
-      return (
-        <Container>
-          {this.state.loading ? (
-            <div style={{ position: 'fixed', top: '50%', left: '50%' }}>
-              <Spinner animation="border" role="status"></Spinner>
-            </div>
-          ) : (
-            <div>
-              <Navbar expand="md">
-                <Navbar.Brand>
-                  <Image src={fullLogo}></Image>
-                </Navbar.Brand>
+    return (
+      <div style={{ background: '#1e528a', height: '100vh', width: '100vw' }}>
+        <div style={{ textAlign: 'center' }}>
+          <img
+            style={{
+              display: 'block',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              width: '40%'
+            }}
+            src="https://media.giphy.com/media/l4FGn8asw5EJrm10s/giphy.gif"></img>
+          <h3>
+            <a style={{ color: 'white' }} href="mailto:mike.gallagh@gmail.com">
+              mike.gallagh@gmail.com
+            </a>
+          </h3>
+        </div>
+      </div>
+    );
 
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                  <Nav style={{ textAlign: 'center' }}>
-                    {this.state.self.email}
-                  </Nav>
-                  <Nav className="ml-auto">
-                    {this.state.self.isLoggedIn ? (
-                      <Nav.Link href="/api/logout">
-                        <Button variant="outline-secondary">Log Out</Button>
-                      </Nav.Link>
-                    ) : (
-                      <Nav.Link href="/auth/google">
-                        <Button variant="outline-secondary">Log In</Button>
-                      </Nav.Link>
-                    )}
-                  </Nav>
-                  {this.state.self.isLoggedIn ? (
-                    <Button
-                      disabled={this.state.self.in}
-                      onClick={this.handleCheckInClick}
-                      variant="success">
-                      Check in
-                    </Button>
-                  ) : null}
-                </Navbar.Collapse>
-              </Navbar>
-              <Row>
-                <Col className="group-container">
-                  <div id="in-group">
-                    <h2>In</h2>
-                    <ListGroup>
-                      {this.state.inTeam.map((teamMember, index) => {
-                        return (
-                          <ListGroup.Item key={index} variant="success">
-                            <div
-                              style={{
-                                float: 'left',
-                                display: 'flex',
-                                alignItems: 'center'
-                              }}>
-                              <div>
-                                <Image
-                                  style={{
-                                    height: '2em',
-                                    width: '2em',
-                                    marginRight: '1em'
-                                  }}
-                                  src={teamMember.photo_url}
-                                  roundedCircle></Image>
-                              </div>
-                              <span>{`${teamMember.first_name} ${teamMember.last_name}`}</span>
-                            </div>
-                            <div style={{ float: 'right' }}>
-                              {moment
-                                .unix(teamMember.timestamp)
-
-                                .format('LTS')}
-                            </div>
-                          </ListGroup.Item>
-                        );
-                      })}
-                    </ListGroup>
-                  </div>
-                  <div id="out-group">
-                    <h2>Out</h2>
-                    <ListGroup>
-                      {this.state.outTeam.map((teamMember, index) => {
-                        if (teamMember.email.indexOf('catsone.com') > 0) {
-                          return (
-                            <ListGroup.Item key={index} variant="danger">
-                              <div
-                                style={{
-                                  float: 'left',
-                                  display: 'flex',
-                                  alignItems: 'center'
-                                }}>
-                                <div>
-                                  <Image
-                                    style={{
-                                      height: '2em',
-                                      width: '2em',
-                                      marginRight: '1em'
-                                    }}
-                                    src={teamMember.photo_url}
-                                    roundedCircle></Image>
-                                </div>
-                                <div>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
-                              </div>
-                              <div style={{ float: 'right' }}>
-                                {moment
-                                  .unix(teamMember.timestamp)
-
-                                  .format('LTS')}
-                              </div>
-                            </ListGroup.Item>
-                          );
-                        }
-                      })}
-                    </ListGroup>
-                  </div>
-                </Col>
-              </Row>
-              <div>
-                {this.state.socketDetails.arrival
-                  ? this.state.socketDetails.arrival.timestamp
-                  : null}
-              </div>
-              {this.state.self.id ? (
-                <div className="reports-container">
-                  <Accordion>
-                    <Card>
-                      <Accordion.Toggle
-                        as={props => (
-                          <Button
-                            {...props}
-                            className="btn-success"
-                            style={{ width: '100%' }}>
-                            Arrivals History
-                          </Button>
-                        )}
-                        eventKey="0"></Accordion.Toggle>
-                      <Accordion.Collapse eventKey="0">
-                        <Card.Body>
-                          
-                          <canvas id="myChart" ref={this.chartRef} />
-                        </Card.Body>
-                      </Accordion.Collapse>
-                    </Card>
-                  </Accordion>
-                </div>
-              ) : null}
-            </div>
-          )}
-        </Container>
-      );
-    } else {
-      return (
-        <h1 style={{ color: 'red' }}>
-          Something went wrong, please reload the page. If it does not resolve
-          itself, let Mike know.
-        </h1>
-      );
-    }
+    //   if (!this.state.error) {
+    //     return (
+    //       <Container>
+    //         {this.state.loading ? (
+    //           <div style={{ position: 'fixed', top: '50%', left: '50%' }}>
+    //             <Spinner animation="border" role="status"></Spinner>
+    //           </div>
+    //         ) : (
+    //           <div>
+    //             <Navbar expand="md">
+    //               <Navbar.Brand>
+    //                 <Image src={fullLogo}></Image>
+    //               </Navbar.Brand>
+    //               <Navbar.Toggle aria-controls="basic-navbar-nav" />
+    //               <Navbar.Collapse id="basic-navbar-nav">
+    //                 <Nav style={{ textAlign: 'center' }}>
+    //                   {this.state.self.email}
+    //                 </Nav>
+    //                 <Nav className="ml-auto">
+    //                   {this.state.self.isLoggedIn ? (
+    //                     <Nav.Link href="/api/logout">
+    //                       <Button variant="outline-secondary">Log Out</Button>
+    //                     </Nav.Link>
+    //                   ) : (
+    //                     <Nav.Link href="/auth/google">
+    //                       <Button variant="outline-secondary">Log In</Button>
+    //                     </Nav.Link>
+    //                   )}
+    //                 </Nav>
+    //                 {this.state.self.isLoggedIn ? (
+    //                   <Button
+    //                     disabled={this.state.self.in}
+    //                     onClick={this.handleCheckInClick}
+    //                     variant="success">
+    //                     Check in
+    //                   </Button>
+    //                 ) : null}
+    //               </Navbar.Collapse>
+    //             </Navbar>
+    //             <Row>
+    //               <Col className="group-container">
+    //                 <div id="in-group">
+    //                   <h2>In</h2>
+    //                   <ListGroup>
+    //                     {this.state.inTeam.map((teamMember, index) => {
+    //                       return (
+    //                         <ListGroup.Item key={index} variant="success">
+    //                           <div
+    //                             style={{
+    //                               float: 'left',
+    //                               display: 'flex',
+    //                               alignItems: 'center'
+    //                             }}>
+    //                             <div>
+    //                               <Image
+    //                                 style={{
+    //                                   height: '2em',
+    //                                   width: '2em',
+    //                                   marginRight: '1em'
+    //                                 }}
+    //                                 src={teamMember.photo_url}
+    //                                 roundedCircle></Image>
+    //                             </div>
+    //                             <span>{`${teamMember.first_name} ${teamMember.last_name}`}</span>
+    //                           </div>
+    //                           <div style={{ float: 'right' }}>
+    //                             {moment
+    //                               .unix(teamMember.timestamp)
+    //                               .format('LTS')}
+    //                           </div>
+    //                         </ListGroup.Item>
+    //                       );
+    //                     })}
+    //                   </ListGroup>
+    //                 </div>
+    //                 <div id="out-group">
+    //                   <h2>Out</h2>
+    //                   <ListGroup>
+    //                     {this.state.outTeam.map((teamMember, index) => {
+    //                       if (teamMember.email.indexOf('catsone.com') > 0) {
+    //                         return (
+    //                           <ListGroup.Item key={index} variant="danger">
+    //                             <div
+    //                               style={{
+    //                                 float: 'left',
+    //                                 display: 'flex',
+    //                                 alignItems: 'center'
+    //                               }}>
+    //                               <div>
+    //                                 <Image
+    //                                   style={{
+    //                                     height: '2em',
+    //                                     width: '2em',
+    //                                     marginRight: '1em'
+    //                                   }}
+    //                                   src={teamMember.photo_url}
+    //                                   roundedCircle></Image>
+    //                               </div>
+    //                               <div>{`${teamMember.first_name} ${teamMember.last_name}`}</div>
+    //                             </div>
+    //                             <div style={{ float: 'right' }}>
+    //                               {moment
+    //                                 .unix(teamMember.timestamp)
+    //                                 .format('LTS')}
+    //                             </div>
+    //                           </ListGroup.Item>
+    //                         );
+    //                       }
+    //                     })}
+    //                   </ListGroup>
+    //                 </div>
+    //               </Col>
+    //             </Row>
+    //             <div>
+    //               {this.state.socketDetails.arrival
+    //                 ? this.state.socketDetails.arrival.timestamp
+    //                 : null}
+    //             </div>
+    //             {this.state.self.id ? (
+    //               <div className="reports-container">
+    //                 <Accordion>
+    //                   <Card>
+    //                     <Accordion.Toggle
+    //                       as={props => (
+    //                         <Button
+    //                           {...props}
+    //                           className="btn-success"
+    //                           style={{ width: '100%' }}>
+    //                           Arrivals History
+    //                         </Button>
+    //                       )}
+    //                       eventKey="0"></Accordion.Toggle>
+    //                     <Accordion.Collapse eventKey="0">
+    //                       <Card.Body>
+    //                         <canvas id="myChart" ref={this.chartRef} />
+    //                       </Card.Body>
+    //                     </Accordion.Collapse>
+    //                   </Card>
+    //                 </Accordion>
+    //               </div>
+    //             ) : null}
+    //           </div>
+    //         )}
+    //       </Container>
+    //     );
+    //   } else {
+    //     return (
+    //       <h1 style={{ color: 'red' }}>
+    //         Something went wrong, please reload the page. If it does not resolve
+    //         itself, let Mike know.
+    //       </h1>
+    //     );
+    //   }
   }
 }
